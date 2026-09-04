@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}АвтоРиск — автоматизированная оценка профессиональных рисков{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .gradient-text {
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .glow-blue {
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, rgba(37, 99, 235, 0) 70%);
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+<!-- Шапка -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/60">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+            </div>
+            <span class="text-lg font-bold text-gray-900">АвтоРиск</span>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-8">
+            <a href="#how" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">Как это работает</a>
+            <a href="#features" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">Возможности</a>
+            <a href="#pricing" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">Тарифы</a>
+        </nav>
+
+        <div class="flex items-center gap-3">
+            <a href="/login" class="hidden sm:inline-block text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">Войти</a>
+            <a href="/register" class="inline-block text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">Начать бесплатно</a>
+        </div>
+    </div>
+</header>
+
+<!-- Контент -->
+<main class="pt-16">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Футер -->
+<footer class="border-t border-gray-200 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-gray-900">АвтоРиск</span>
+                </div>
+                <p class="text-sm text-gray-500">Автоматизированная оценка профессиональных рисков.</p>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Продукт</h3>
+                <ul class="space-y-2">
+                    <li><a href="#how" class="text-sm text-gray-500 hover:text-gray-900">Как это работает</a></li>
+                    <li><a href="#features" class="text-sm text-gray-500 hover:text-gray-900">Возможности</a></li>
+                    <li><a href="#pricing" class="text-sm text-gray-500 hover:text-gray-900">Тарифы</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Поддержка</h3>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-sm text-gray-500 hover:text-gray-900">Документация</a></li>
+                    <li><a href="#" class="text-sm text-gray-500 hover:text-gray-900">Связаться с нами</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Правовая информация</h3>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-sm text-gray-500 hover:text-gray-900">Оферта</a></li>
+                    <li><a href="#" class="text-sm text-gray-500 hover:text-gray-900">Политика конфиденциальности</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-10 pt-6 border-t border-gray-200 text-center">
+            <p class="text-sm text-gray-400">© 2026 АвтоРиск. Все права защищены.</p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
