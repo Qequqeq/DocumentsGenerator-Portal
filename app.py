@@ -10,5 +10,15 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 @app.get("/")
-def landing(request: Request):
+def landing_main(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/auditors")
+def landing_auditors(request: Request):
+    return templates.TemplateResponse("auditors.html", {"request": request})
+
+
+@app.get("/organizations")
+def landing_organizations(request: Request):
+    return templates.TemplateResponse("organizations.html", {"request": request})
