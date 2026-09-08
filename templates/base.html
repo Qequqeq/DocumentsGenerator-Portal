@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}АвтоРиск — автоматизация оценки профессиональных рисков{% endblock %}</title>
+    <title>{% block title %}АвтоРиск{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -171,6 +171,21 @@
         .m-s5-download { animation-name: ms5download; }
     </style>
 </head>
+<script>
+// Универсальная форма регистрации: переход по якорю #register с любой страницы
+window.addEventListener('load', function () {
+    if (window.location.hash === '#register') {
+        var block = document.getElementById('register');
+        if (block) {
+            setTimeout(function () {
+                block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                var input = block.querySelector('input[name="email"]');
+                if (input) input.focus({ preventScroll: true });
+            }, 250);
+        }
+    }
+});
+</script>
 <body class="bg-white text-gray-900 antialiased">
 
 <!-- Шапка -->
@@ -186,17 +201,24 @@
         </a>
 
         <nav class="hidden md:flex items-center gap-8">
-            <a href="/auditors" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Аудиторам</a>
-            <a href="/organizations" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Организациям</a>
+            <a href="/#results" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Примеры документов</a>
             <a href="/#pricing" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Тарифы</a>
             <a href="/#faq" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">FAQ</a>
         </nav>
 
         <div class="flex items-center gap-3">
-            <a href="/login" class="hidden sm:inline-block text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">Войти</a>
-            <a href="/register" class="inline-block text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30">Начать бесплатно</a>
+            {% if current_user_email %}
+                <a href="/account" class="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                        {{ current_user_email[0] | upper }}
+                    </div>
+                    <span class="hidden md:inline">Кабинет</span>
+                </a>
+            {% else %}
+                <a href="/login" class="hidden sm:inline-block text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">Войти</a>
+            {% endif %}
+            <a href="/#register" class="inline-block text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30">Начать бесплатно</a>
         </div>
-    </div>
 </header>
 
 <main>
@@ -216,7 +238,8 @@
                     </div>
                     <span class="font-bold text-gray-900">АвтоРиск</span>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed">Автоматизация оценки профессиональных рисков. Создано совместно с практикующим аудитором.</p>
+                <p class="text-sm text-gray-500 leading-relaxed mb-4">Автоматизация оценки профессиональных рисков. Создано совместно с практикующим аудитором.</p>
+                <a href="mailto:pogosanaleksej710@gmail.com" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">pogosanaleksej710@gmail.com</a>
             </div>
             <div>
                 <h3 class="text-sm font-semibold text-gray-900 mb-4">Продукт</h3>
@@ -227,10 +250,12 @@
                 </ul>
             </div>
             <div>
-                <h3 class="text-sm font-semibold text-gray-900 mb-4">Аудитория</h3>
+                <h3 class="text-sm font-semibold text-gray-900 mb-4">Тарифы</h3>
                 <ul class="space-y-3">
-                    <li><a href="/auditors" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Для аудиторов</a></li>
-                    <li><a href="/organizations" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Для ИП и организаций</a></li>
+                    <li><a href="/#pricing" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Базовый: оплата за отчёт</a></li>
+                    <li><a href="/#pricing" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Продвинутый: подписка</a></li>
+                    <li><a href="/#pricing" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Селф-хостинг</a></li>
+                    <li><a href="/login" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Личный кабинет</a></li>
                 </ul>
             </div>
             <div>
@@ -243,6 +268,7 @@
         </div>
         <div class="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p class="text-sm text-gray-400">© 2026 АвтоРиск. Все права защищены.</p>
+            <p class="text-sm text-gray-400">Соответствует требованиям Приказа Минтруда России № 776н</p>
         </div>
     </div>
 </footer>

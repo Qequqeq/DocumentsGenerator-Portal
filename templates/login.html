@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — АвтоРиск{% endblock %}
+
+{% block content %}
+<section class="min-h-screen flex items-center py-28">
+    <div class="max-w-md mx-auto px-6 w-full">
+        <div class="bg-white border border-gray-200 rounded-2xl p-8 shadow-xl shadow-blue-900/5">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mx-auto mb-5">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Вход в аккаунт</h1>
+                <p class="text-sm text-gray-500">Введите данные, чтобы продолжить работу</p>
+            </div>
+
+            {% if login_error %}
+            <div class="mb-5 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">
+                {{ login_error }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="/login" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                    <input type="email" name="email" value="{{ login_email or '' }}" required placeholder="your@email.com"
+                           class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Пароль</label>
+                    <input type="password" name="password" required placeholder="Ваш пароль"
+                           class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                </div>
+                <button type="submit"
+                        class="w-full inline-flex items-center justify-center gap-2 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-6 py-3.5 rounded-xl transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-600/30">
+                    Войти
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-500">
+                    Нет аккаунта?
+                    <a href="/#register" class="text-blue-600 font-medium hover:text-blue-700">Зарегистрироваться</a>
+                </p>
+            </div>
+
+            <div class="mt-4 text-center">
+                <a href="/" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">← На главную</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

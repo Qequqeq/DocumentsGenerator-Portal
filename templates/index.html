@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}АвтоРиск — автоматизация оценки профессиональных рисков{% endblock %}
+{% block title %}АвтоРиск{% endblock %}
 
 {% block content %}
 
@@ -14,7 +14,7 @@
     <div class="relative max-w-[1440px] mx-auto px-6 lg:px-12 pt-24 pb-16 w-full">
         <div class="grid lg:grid-cols-5 gap-12 lg:gap-10 items-center">
 
-            <!-- ЛЕВАЯ ЧАСТЬ: текст -->
+            <!-- ЛЕВАЯ ЧАСТЬ: текст + универсальная форма регистрации -->
             <div class="text-left lg:col-span-2">
                 <div class="reveal reveal-scale inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 mb-8">
                     <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
@@ -26,27 +26,32 @@
                     <span class="gradient-text">за минуты</span>
                 </h1>
 
-                <p class="reveal reveal-up reveal-delay-2 text-lg text-gray-500 max-w-xl mb-10 leading-relaxed">
+                <p class="reveal reveal-up reveal-delay-2 text-lg text-gray-500 max-w-xl mb-8 leading-relaxed">
                     Сервис для автоматической генерации отчетных документов по ОПР
                 </p>
 
-                <div class="reveal reveal-up reveal-delay-3 mb-6">
-                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Работает так, как Вам нужно</h3>
-                </div>
+                <!-- Универсальная форма регистрации (якорь #register) -->
+                <div id="register" class="reveal reveal-up reveal-delay-3 scroll-mt-28 bg-white/90 backdrop-blur border border-gray-200 rounded-2xl p-6 shadow-xl shadow-blue-900/5">
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">Создайте аккаунт</h3>
+                    <p class="text-sm text-gray-500 mb-4">Полный цикл бесплатно до готового документа. Платите только когда нужно скачать результат.</p>
 
-                <div class="reveal reveal-up reveal-delay-3 flex flex-col sm:flex-row gap-4">
-                    <a href="/auditors" class="group inline-flex items-center justify-center gap-3 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-7 py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-600/30">
-                        Приложение
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                        </svg>
-                    </a>
-                    <a href="/organizations" class="group inline-flex items-center justify-center gap-3 text-base font-semibold text-gray-700 bg-white border border-gray-300 hover:border-gray-400 hover:bg-gray-50 px-7 py-4 rounded-2xl transition-all">
-                        Веб-версия
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                        </svg>
-                    </a>
+                    {% if register_error %}
+                    <div class="mb-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{{ register_error }}</div>
+                    {% endif %}
+
+                    <form method="post" action="/register" class="space-y-3">
+                        <input type="email" name="email" value="{{ register_email or '' }}" required placeholder="Email"
+                               class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                        <input type="password" name="password" required minlength="8" placeholder="Пароль (минимум 8 символов)"
+                               class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                        <button type="submit"
+                                class="w-full inline-flex items-center justify-center gap-2 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-6 py-3.5 rounded-xl transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-600/30">
+                            Начать бесплатно
+                        </button>
+                    </form>
+
+                    <p class="text-xs text-gray-400 mt-3">Регистрируясь, вы соглашаетесь с офертой и политикой конфиденциальности.</p>
+                    <p class="text-xs text-gray-500 mt-2">Уже есть аккаунт? <a href="/login" class="text-blue-600 font-medium hover:text-blue-700">Войти</a></p>
                 </div>
             </div>
 
@@ -289,7 +294,7 @@
                         <span class="text-sm font-bold leading-tight">Дублирование задач</span>
                     </div>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed">Оценка и отчётность выполняются разными людьми — система убирает повторную работу.</p>
+                <p class="text-sm text-gray-500 leading-relaxed">Мы объединили процессы оценки рисков и написания отчетности.</p>
             </div>
             <div></div>
 
@@ -304,14 +309,14 @@
                         <span class="text-sm font-bold leading-tight">Время на правки</span>
                     </div>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed">Любые изменения применяются централизованно и не требуют часов ручного редактирования.</p>
+                <p class="text-sm text-gray-500 leading-relaxed">Любые изменения применяются централизованно и не требуют ручного редактирования.</p>
             </div>
 
             <div class="flex justify-center">
                 <div class="reveal reveal-scale w-[420px] h-[420px] rounded-full bg-gray-100 flex items-center justify-center text-center px-12">
                     <div>
-                        <h2 class="text-3xl xl:text-4xl font-bold text-gray-900 leading-tight mb-4">Где вы теряете <span class="text-blue-600">время и деньги</span></h2>
-                        <p class="text-sm text-gray-500 leading-relaxed">Большинство потерь — ручная рутина: одинаковые поля, бесконечные правки и перепроверки, которые съедают часы работы.</p>
+                        <h2 class="text-3xl xl:text-4xl font-bold text-gray-900 leading-tight mb-4">Куда уходят <span class="text-blue-600">время и деньги</span></h2>
+                        <p class="text-sm text-gray-500 leading-relaxed">Ручной ввод, правки, перепроверка. Автоматизация избавляет от этого. Пока вы сфокусированы на чем-то важном.</p>
                     </div>
                 </div>
             </div>
@@ -327,7 +332,7 @@
                         <span class="text-sm font-bold leading-tight">Ошибки и опечатки</span>
                     </div>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed">Автозаполнение полей и валидация снижают число человеческих ошибок.</p>
+                <p class="text-sm text-gray-500 leading-relaxed">Все документы заполняются автоматически.</p>
             </div>
 
             <div></div>
@@ -339,10 +344,10 @@
                         </svg>
                     </div>
                     <div class="bg-blue-600 text-white px-4 flex items-center">
-                        <span class="text-sm font-bold leading-tight">Повторяющиеся поля</span>
+                        <span class="text-sm font-bold leading-tight">Шаблоны</span>
                     </div>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed">Шаблоны позволяют заполнить типовые риски автоматически для многих сотрудников.</p>
+                <p class="text-sm text-gray-500 leading-relaxed">Вот тут надо что-то мощное написать,я хз).</p>
             </div>
             <div></div>
 
@@ -352,8 +357,8 @@
         <div class="lg:hidden flex flex-col items-center gap-6">
             <div class="w-72 h-72 rounded-full bg-gray-100 flex items-center justify-center text-center px-8">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900 leading-tight mb-3">Где вы теряете <span class="text-blue-600">время и деньги</span></h2>
-                    <p class="text-xs text-gray-500 leading-relaxed">Ручная рутина: одинаковые поля, правки и перепроверки.</p>
+                    <h2 class="text-2xl font-bold text-gray-900 leading-tight mb-3">Куда уходят <span class="text-blue-600">время и деньги</span></h2>
+                    <p class="text-xs text-gray-500 leading-relaxed">Ручной ввод, правки, перепроверка. Автоматизация избавляет от этого.</p>
                 </div>
             </div>
             <div class="w-full space-y-4">
@@ -362,28 +367,28 @@
                         <div class="w-9 h-9 bg-slate-800 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></div>
                         <div class="bg-blue-600 text-white px-3 flex items-center"><span class="text-xs font-bold">Дублирование задач</span></div>
                     </div>
-                    <p class="text-xs text-gray-500">Оценка и отчётность выполняются разными людьми — система убирает повторную работу.</p>
+                    <p class="text-xs text-gray-500">Мы объединили процессы оценки рисков и написания отчетности.</p>
                 </div>
                 <div class="bracket-card px-6 py-4">
                     <div class="flex items-stretch mb-2">
                         <div class="w-9 h-9 bg-slate-800 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
                         <div class="bg-blue-600 text-white px-3 flex items-center"><span class="text-xs font-bold">Время на правки</span></div>
                     </div>
-                    <p class="text-xs text-gray-500">Любые изменения применяются централизованно и не требуют часов ручного редактирования.</p>
+                    <p class="text-xs text-gray-500">Любые изменения применяются централизованно и не требуют ручного редактирования.</p>
                 </div>
                 <div class="bracket-card px-6 py-4">
                     <div class="flex items-stretch mb-2">
                         <div class="w-9 h-9 bg-slate-800 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
                         <div class="bg-blue-600 text-white px-3 flex items-center"><span class="text-xs font-bold">Ошибки и опечатки</span></div>
                     </div>
-                    <p class="text-xs text-gray-500">Автозаполнение полей и валидация снижают число человеческих ошибок.</p>
+                    <p class="text-xs text-gray-500">Все поля заполняются автоматически.</p>
                 </div>
                 <div class="bracket-card px-6 py-4">
                     <div class="flex items-stretch mb-2">
                         <div class="w-9 h-9 bg-slate-800 flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg></div>
                         <div class="bg-blue-600 text-white px-3 flex items-center"><span class="text-xs font-bold">Повторяющиеся поля</span></div>
                     </div>
-                    <p class="text-xs text-gray-500">Шаблоны позволяют заполнить типовые риски автоматически для многих сотрудников.</p>
+                    <p class="text-xs text-gray-500">Надо что-то мощное икс 2.</p>
                 </div>
             </div>
         </div>
@@ -395,34 +400,81 @@
 <section id="results" class="py-28 bg-white">
     <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
         <div class="text-center max-w-3xl mx-auto mb-14">
-            <span class="reveal reveal-up inline-block text-xs font-semibold uppercase tracking-widest text-blue-600 mb-3">Результат</span>
-            <h2 class="reveal reveal-up reveal-delay-1 text-3xl md:text-4xl font-bold text-gray-900 mb-4">Вместо того чтобы собирать отчёт с нуля — 30 минут на загрузку данных и готовые шаблоны</h2>
-            <p class="reveal reveal-up reveal-delay-2 text-lg text-gray-500">Мы загрузили данные, применили шаблоны сотрудников и получили полный комплект документов.</p>
+            <span class="reveal reveal-up inline-block text-xs font-semibold uppercase tracking-widest text-blue-600 mb-3"></span>
+            <h2 class="reveal reveal-up reveal-delay-1 text-3xl md:text-4xl font-bold text-gray-900 mb-4">Просто заполните информацию и выберите подходящие шаблоны</h2>
+            <p class="reveal reveal-up reveal-delay-2 text-lg text-gray-500">Программа сама оформит отчёт, оценит риски и подскажет, какой именно шаблон выбрать. Вам останется только скачать готовый комплект документов.</p>
         </div>
 
         <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
-            <div class="reveal reveal-left reveal-delay-2 bg-white rounded-2xl shadow-xl shadow-blue-900/10 border border-gray-200 overflow-hidden">
-                <div class="bg-gray-50 border-b border-gray-100 px-5 py-3 flex items-center justify-between">
-                    <span class="text-xs font-semibold text-gray-700">Карта оценки рисков</span>
-                    <span class="text-[10px] text-gray-400 font-medium">.docx</span>
-                </div>
-                <video autoplay loop muted playsinline class="w-full block bg-white">
-                    <source src="/static/videos/card_scroll.mp4" type="video/mp4">
-                </video>
+
+            <!-- Карта оценки рисков -->
+            <div class="reveal reveal-left reveal-delay-2">
+                <a href="/static/results/card_sample.pdf" target="_blank"
+                   class="group block bg-white rounded-2xl shadow-xl shadow-blue-900/10 border border-gray-200 overflow-hidden hover:shadow-2xl hover:border-blue-300 transition-all">
+                    <div class="bg-gray-50 border-b border-gray-100 px-5 py-3 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-700">Карта оценки рисков</span>
+                        <span class="text-[10px] text-gray-400 font-medium">.pdf</span>
+                    </div>
+                    <div class="relative">
+                        <img src="/static/results/card_preview.png" alt="Карта оценки рисков — первая страница"
+                             class="w-full h-[480px] object-cover object-top block bg-white">
+
+                        <!-- Значок "открыть" (виден всегда, подсказывает кликабельность) -->
+                        <div class="absolute top-3 right-3 w-9 h-9 rounded-lg bg-white/90 border border-gray-200 shadow-sm flex items-center justify-center text-gray-500 group-hover:text-blue-600 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </div>
+
+                        <!-- Оверлей при наведении -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
+                            <span class="inline-flex items-center gap-2 bg-white text-blue-700 text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg">
+                                Открыть документ полностью
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                <p class="text-center text-sm text-gray-500 mt-4">Индивидуальная карта рисков для каждого работника</p>
             </div>
-            <div class="reveal reveal-right reveal-delay-3 bg-white rounded-2xl shadow-xl shadow-indigo-900/10 border border-gray-200 overflow-hidden">
-                <div class="bg-gray-50 border-b border-gray-100 px-5 py-3 flex items-center justify-between">
-                    <span class="text-xs font-semibold text-gray-700">Сводный отчёт по организации</span>
-                    <span class="text-[10px] text-gray-400 font-medium">.docx</span>
-                </div>
-                <video autoplay loop muted playsinline class="w-full block bg-white">
-                    <source src="/static/videos/report_scroll.mp4" type="video/mp4">
-                </video>
+
+            <!-- Сводный отчёт -->
+            <div class="reveal reveal-right reveal-delay-3">
+                <a href="/static/results/report_sample.pdf" target="_blank"
+                   class="group block bg-white rounded-2xl shadow-xl shadow-indigo-900/10 border border-gray-200 overflow-hidden hover:shadow-2xl hover:border-blue-300 transition-all">
+                    <div class="bg-gray-50 border-b border-gray-100 px-5 py-3 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-700">Сводный отчёт по организации</span>
+                        <span class="text-[10px] text-gray-400 font-medium">.pdf</span>
+                    </div>
+                    <div class="relative">
+                        <img src="/static/results/report_preview.png" alt="Сводный отчёт — первая страница"
+                             class="w-full h-[480px] object-cover object-top block bg-white">
+
+                        <div class="absolute top-3 right-3 w-9 h-9 rounded-lg bg-white/90 border border-gray-200 shadow-sm flex items-center justify-center text-gray-500 group-hover:text-blue-600 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </div>
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
+                            <span class="inline-flex items-center gap-2 bg-white text-blue-700 text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg">
+                                Открыть документ полностью
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                <p class="text-center text-sm text-gray-500 mt-4">Сводный отчёт по всей организации</p>
             </div>
+
         </div>
 
         <div class="reveal reveal-up reveal-delay-4 text-center">
-            <a href="/static/sample_result.zip" class="inline-flex items-center gap-2 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-8 py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20">
+            <a href="/static/results/sample_result.zip" class="inline-flex items-center gap-2 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-8 py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
@@ -439,41 +491,86 @@
         <div class="text-center mb-14">
             <span class="reveal reveal-up inline-block text-xs font-semibold uppercase tracking-widest text-blue-600 mb-3">Тарифы</span>
             <h2 class="reveal reveal-up reveal-delay-1 text-3xl md:text-4xl font-bold text-gray-900 mb-4">Выберите свой формат</h2>
+            <p class="reveal reveal-up reveal-delay-2 text-lg text-gray-500 max-w-2xl mx-auto">Платите за отдельные отчёты, оформите подписку для безлимитной работы и кастомизации — или разверните сервис на своём сервере.</p>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <div class="reveal reveal-left reveal-delay-2 bg-white border border-gray-200 rounded-2xl p-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Веб-версия</h3>
-                <p class="text-sm text-gray-500 mb-6">Для разовых задач</p>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
+
+            <!-- Базовый -->
+            <div class="reveal reveal-left reveal-delay-2 bg-white border border-gray-200 rounded-2xl p-8 flex flex-col">
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Базовый</h3>
+                <p class="text-sm text-gray-500 mb-6">Веб-версия · для разовых задач</p>
                 <div class="mb-2">
                     <span class="text-4xl font-bold text-gray-900">1 000</span>
                     <span class="text-gray-500"> ₽ / отчёт</span>
                 </div>
-                <p class="text-sm text-gray-500 mb-6">До 5 должностей. Каждая следующая — +50 ₽.</p>
+                <p class="text-sm text-gray-500 mb-6">До 5 должностей. Каждая следующая +50 ₽.</p>
                 <ul class="space-y-3 mb-8">
                     <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Работает в браузере, ничего не нужно устанавливать</li>
-                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Платите только за готовый документ</li>
-                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Шаблоны и образцы файлов включены</li>
+                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Полный цикл: от загрузки данных до готовых документов</li>
+                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Шаблоны должностей и образцы файлов включены</li>
+                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Платите только за готовый отчёт</li>
                 </ul>
-                <a href="/register" class="block w-full text-center text-sm font-semibold text-blue-600 bg-white border border-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg transition-colors">Попробовать бесплатно</a>
+                <a href="/#register" class="mt-auto block w-full text-center text-sm font-semibold text-blue-600 bg-white border border-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg transition-colors">Попробовать бесплатно</a>
             </div>
 
-            <div class="reveal reveal-right reveal-delay-3 relative border-2 border-blue-600 rounded-2xl p-8 shadow-xl shadow-blue-100 bg-white">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-semibold">Для регулярной работы</div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">Десктоп-приложение</h3>
-                <p class="text-sm text-gray-500 mb-6">Подписка</p>
+            <!-- Продвинутый -->
+            <div class="reveal reveal-up reveal-delay-3 relative border-2 border-blue-600 rounded-2xl p-8 shadow-xl shadow-blue-100 bg-white flex flex-col">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-semibold whitespace-nowrap">Для регулярной работы</div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Продвинутый</h3>
+                <p class="text-sm text-gray-500 mb-6">Веб-версия · подписка</p>
                 <div class="mb-2">
                     <span class="text-4xl font-bold text-gray-900">5 000</span>
                     <span class="text-gray-500"> ₽ / месяц</span>
                 </div>
-                <p class="text-sm text-gray-500 mb-6">Или 50 000 ₽ в год — два месяца бесплатно.</p>
+                <p class="text-sm text-gray-500 mb-6">Или 50 000 ₽ в год (два месяца бесплатно).</p>
                 <ul class="space-y-3 mb-8">
-                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Неограниченные отчёты и должности</li>
-                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Работает оффлайн, данные не покидают ваш ПК</li>
-                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Кастомизация шаблонов, шкал и описаний</li>
+                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Неограниченное количество отчётов и должностей</li>
+                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Настройка диапазонов рисков и порогов уровней</li>
+                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Свои описания степеней, вероятностей и коэффициентов</li>
+                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Собственные меры противодействия рискам</li>
+                    <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Всё из базового тарифа включено</li>
                 </ul>
-                <a href="/register" class="block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">Оформить подписку</a>
+                <a href="/#register" class="mt-auto block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">Оформить подписку</a>
             </div>
+
+            <!-- Селф-хостинг -->
+            <div class="reveal reveal-right reveal-delay-4 relative bg-slate-900 rounded-2xl p-8 text-white flex flex-col md:col-span-2 lg:col-span-1">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-slate-700 text-white text-xs font-semibold whitespace-nowrap">Для строгих требований</div>
+                <h3 class="text-lg font-semibold mb-1">Селф-хостинг</h3>
+                <p class="text-sm text-slate-400 mb-6">Развёртывание на вашем сервере</p>
+                <div class="mb-2">
+                    <span class="text-4xl font-bold">По запросу</span>
+                </div>
+                <p class="text-sm text-slate-400 mb-6">Стоимость зависит от конфигурации и поддержки.</p>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-start gap-3 text-sm text-slate-300"><svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Данные не покидают периметр вашей организации</li>
+                    <li class="flex items-start gap-3 text-sm text-slate-300"><svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Полная конфиденциальность: никакого доступа третьих лиц</li>
+                    <li class="flex items-start gap-3 text-sm text-slate-300"><svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Выделенные ресурсы: нет нагрузки от других пользователей и максимальная скорость</li>
+                    <li class="flex items-start gap-3 text-sm text-slate-300"><svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Развёртывание, обновления и обслуживание на нас</li>
+                </ul>
+
+                {% if selfhost_sent %}
+                <div class="mt-auto rounded-xl bg-slate-800 border border-slate-700 p-5 text-center">
+                    <p class="text-sm font-semibold text-green-400 mb-1">Заявка отправлена</p>
+                    <p class="text-xs text-slate-400">Свяжемся с вами по указанным контактам.</p>
+                </div>
+                {% else %}
+                <form method="post" action="/selfhost-request" class="mt-auto space-y-3">
+                    <input type="text" name="name" required placeholder="Ваше имя"
+                           class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+                    <input type="text" name="contact" required placeholder="Email или телефон"
+                           class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+                    <textarea name="comment" rows="2" placeholder="Комментарий (необязательно)"
+                              class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"></textarea>
+                    <button type="submit"
+                            class="w-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">
+                        Отправить заявку
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
         </div>
     </div>
 </section>
@@ -490,7 +587,7 @@
                 <h2 class="reveal reveal-up text-3xl md:text-4xl font-bold text-white mb-4">Попробуйте веб-версию прямо сейчас</h2>
                 <p class="reveal reveal-up reveal-delay-1 text-lg text-blue-100 max-w-xl mx-auto mb-10">Регистрация занимает меньше минуты. Первый отчёт можно собрать уже сегодня — платите только когда нужен готовый документ.</p>
                 <div class="reveal reveal-up reveal-delay-2 flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="/register" class="inline-flex items-center gap-2 text-base font-semibold text-blue-600 bg-white hover:bg-blue-50 px-8 py-4 rounded-2xl transition-colors shadow-xl">Начать бесплатно</a>
+                    <a href="/#register" class="inline-flex items-center gap-2 text-base font-semibold text-blue-600 bg-white hover:bg-blue-50 px-8 py-4 rounded-2xl transition-colors shadow-xl">Начать бесплатно</a>
                     <a href="#pricing" class="inline-flex items-center gap-2 text-base font-semibold text-white border border-white/40 hover:bg-white/10 px-8 py-4 rounded-2xl transition-colors">Посмотреть тарифы</a>
                 </div>
             </div>
@@ -512,31 +609,15 @@
                     Нужно ли что-то устанавливать?
                     <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
-                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Веб-версия работает прямо в браузере — установка не нужна. Десктоп-приложение устанавливается на компьютер и работает без интернета.</p>
+                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Нет. Сервис работает в браузере: зарегистрируйтесь и начинайте работу — ничего ставить и настраивать не нужно. Для организаций со строгими требованиями к конфиденциальности есть селф-хостинг: мы развернём сервис на вашем сервере, и данные не покинут периметр компании.</p>
             </details>
 
             <details class="reveal reveal-up group bg-white border border-gray-200 rounded-2xl">
                 <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-semibold text-gray-900 list-none">
-                    Это соответствует требованиям закона?
+                    Чем Базовый тариф отличается от Продвинутого?
                     <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
-                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Да. Все опасности и расчёты соответствуют требованиям Приказа Минтруда России № 776н, а шаблоны подготовлены практикующим аудитором.</p>
-            </details>
-
-            <details class="reveal reveal-up group bg-white border border-gray-200 rounded-2xl">
-                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-semibold text-gray-900 list-none">
-                    Куда попадают мои данные?
-                    <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </summary>
-                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">В десктоп-версии данные не покидают ваш компьютер. В веб-версии файлы используются только для формирования документов и не передаются третьим лицам.</p>
-            </details>
-
-            <details class="reveal reveal-up group bg-white border border-gray-200 rounded-2xl">
-                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-semibold text-gray-900 list-none">
-                    Можно ли настроить шаблоны под свою методологию?
-                    <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </summary>
-                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Да. В десктоп-версии доступны собственные шаблоны должностей, настройка описаний степеней и вероятностей, диапазонов уровней риска и мер противодействия.</p>
+                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Базовый — оплата за отчёт: полный цикл от загрузки данных до готовых документов плюс готовые шаблоны должностей. Продвинутый — подписка: безлимитные отчёты и должности, а также кастомизация: свои диапазоны рисков, описания степеней, вероятностей и коэффициентов, собственные меры противодействия.</p>
             </details>
 
             <details class="reveal reveal-up group bg-white border border-gray-200 rounded-2xl">
@@ -544,7 +625,39 @@
                     Что если мне нужен только один отчёт?
                     <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </summary>
-                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Используйте веб-версию и платите только за готовый отчёт — без подписки и обязательств.</p>
+                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Подойдёт Базовый тариф. Весь цикл можно пройти бесплатно, а заплатить только когда понадобится скачать готовый документ. Без подписки и обязательств.</p>
+            </details>
+
+            <details class="reveal reveal-up group bg-white border border-gray-200 rounded-2xl">
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-semibold text-gray-900 list-none">
+                    Это соответствует требованиям закона?
+                    <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Да. Все опасности и расчёты соответствуют требованиям Приказа Минтруда России № 776н, а шаблоны и форматы документов подготовлены практикующим аудитором и проходят проверки.</p>
+            </details>
+
+            <details class="reveal reveal-up group bg-white border border-gray-200 rounded-2xl">
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-semibold text-gray-900 list-none">
+                    Куда попадают мои данные?
+                    <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">В веб-версии файлы используются только для формирования документов и не передаются третьим лицам. Если нужна полная конфиденциальность — выберите селф-хостинг: сервис работает на вашем сервере, и данные остаются внутри организации.</p>
+            </details>
+
+            <details class="reveal reveal-up group bg-white border border-gray-200 rounded-2xl">
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-semibold text-gray-900 list-none">
+                    Можно ли настроить шаблоны под свою методологию?
+                    <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Да, в Продвинутом тарифе: диапазоны рисков и пороги уровней, свои описания степеней, вероятностей и коэффициентов, собственные меры противодействия. В Базовом доступны готовые шаблоны должностей — их можно применить и скорректировать вручную.</p>
+            </details>
+
+            <details class="reveal reveal-up group bg-white border border-gray-200 rounded-2xl">
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-base font-semibold text-gray-900 list-none">
+                    Что такое селф-хостинг и как его заказать?
+                    <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <p class="px-6 pb-6 text-sm text-gray-500 leading-relaxed">Это развёртывание сервиса на сервере вашей организации: приватность, выделенные ресурсы и высокая скорость. Оставьте заявку в блоке «Селф-хостинг» в тарифах — мы свяжемся с вами и обсудим конфигурацию и условия.</p>
             </details>
         </div>
     </div>

@@ -1,3 +1,6 @@
 # created by virtualenv automatically
 .venv/
 .idea/
+portal/portal.db
+portal/.secret_key
+portal/selfhost_requests.json
