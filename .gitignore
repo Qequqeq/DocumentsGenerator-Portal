@@ -1,6 +1,18 @@
-# created by virtualenv automatically
 .venv/
 .idea/
-portal/portal.db
-portal/.secret_key
-portal/selfhost_requests.json
+selfhost_requests.json
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+*.db
+*.sqlite
+*.sqlite3
+app.db
+*.log
+.DS_Store
+.vscode/
