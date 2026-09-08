@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.modules.auth.models import User
 from app.modules.auth.service import SessionService
+from app.shared.exceptions import RedirectException
 
 
 async def get_current_user_id(request: Request) -> Optional[int]:
@@ -25,3 +26,10 @@ async def get_current_user(
 
     result = await db.execute(select(User).where(User.id == user_id))
     return result.scalar_one_or_none()
+
+async def require_authenticated(
+    current_user: User | None = Depends(get_current_user),
+) -> User:
+    if current_user is None:
+        raise RedirectException("/#register")
+    return current_user

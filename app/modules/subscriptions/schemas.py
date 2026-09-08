@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
+from app.shared.timeutils import utcnow
 
 
 class SubscriptionResponse(BaseModel):
@@ -15,7 +16,7 @@ class SubscriptionResponse(BaseModel):
 
     @property
     def is_active(self) -> bool:
-        return self.status == "active" and self.expires_at > datetime.now()
+        return self.status == "active" and self.expires_at > utcnow()
 
 
 class SubscribeRequest(BaseModel):

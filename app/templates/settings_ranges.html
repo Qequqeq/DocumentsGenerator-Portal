@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Настройка диапазонов{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-3xl mx-auto px-6">
+        <div class="mb-8">
+            <a href="/settings" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                К настройкам
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Настройка диапазонов</h1>
+            <p class="text-sm text-gray-500">Отредактируйте числовые пороги, по которым определяется уровень риска. Тексты уровней риска фиксированы и не подлежат изменению. Изменения применятся при следующей генерации документов.</p>
+        </div>
+
+        {% if saved %}
+        <div class="mb-6 text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">Сохранено. Изменения применятся при следующей генерации документов.</div>
+        {% endif %}
+        {% if error == 'invalid_number' %}
+        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Ошибка: все пороги должны быть числами.</div>
+        {% endif %}
+        {% if error == 'order' %}
+        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Ошибка: пороги должны идти строго по возрастанию: E, D, C, B, A.</div>
+        {% endif %}
+
+        <form method="post" action="/settings/ranges" class="space-y-8">
+
+            <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-5">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold">1</span>
+                    <h2 class="text-base font-semibold text-gray-900">Шкала оценки рисков (основная)</h2>
+                </div>
+                <div class="space-y-4">
+                    {% for threshold, level in summary_info.items() %}
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <p class="text-xs text-gray-500 mb-1">Порог для уровня</p>
+                            <p class="text-sm font-semibold text-gray-900 leading-snug">{{ level }}</p>
+                            <input type="hidden" name="summary_level_{{ loop.index }}" value="{{ level }}">
+                        </div>
+                        <div class="w-36 shrink-0">
+                            <input type="text" name="summary_threshold_{{ loop.index }}" value="{{ threshold }}"
+                                   class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-right focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            <p class="text-[10px] text-gray-400 mt-1 text-right">{% if loop.last %}Минимальное значение{% else %}Максимальное значение{% endif %}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-5">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm font-bold">2</span>
+                    <h2 class="text-base font-semibold text-gray-900">Шкала оценки рисков (для приложения)</h2>
+                </div>
+                <div class="space-y-4">
+                    {% for threshold, level in summary_info_aplication.items() %}
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <p class="text-xs text-gray-500 mb-1">Порог для уровня</p>
+                            <p class="text-sm font-semibold text-gray-900 leading-snug">{{ level }}</p>
+                            <input type="hidden" name="aplication_level_{{ loop.index }}" value="{{ level }}">
+                        </div>
+                        <div class="w-36 shrink-0">
+                            <input type="text" name="aplication_threshold_{{ loop.index }}" value="{{ threshold }}"
+                                   class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-right focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            <p class="text-[10px] text-gray-400 mt-1 text-right">{% if loop.last %}Минимальное значение{% else %}Максимальное значение{% endif %}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="w-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition-colors">Сохранить изменения</button>
+        </form>
+
+        <form method="post" action="/settings/reset-ranges" class="mt-4">
+            <button type="submit" class="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Восстановить значения по умолчанию</button>
+            <p class="text-xs text-gray-400 mt-1">Сбрасывает только настройки диапазонов.</p>
+        </form>
+    </div>
+</section>
+{% endblock %}

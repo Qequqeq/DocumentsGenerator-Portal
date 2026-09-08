@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Optional
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.subscriptions.models import Subscription
+from app.shared.timeutils import utcnow
 
 
 class SubscriptionService:
@@ -27,7 +28,7 @@ class SubscriptionService:
 
         if subscription is None:
             return None
-        if subscription.expires_at < datetime.now():
+        if subscription.expires_at < utcnow():
             subscription.status = "expired"
             await db.commit()
             return None
@@ -49,7 +50,7 @@ class SubscriptionService:
             .values(status="superseded")
         )
 
-        now = datetime.now()
+        now = utcnow()
         if plan == "monthly":
             expires_at = now + timedelta(days=30)
         elif plan == "yearly":

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
-from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any
 
 from app.config import get_settings
+from app.shared.timeutils import utcnow
 
 
 class SelfHostService:
@@ -33,7 +33,7 @@ class SelfHostService:
             "name": name,
             "contact": contact,
             "comment": comment,
-            "created_at": datetime.now().isoformat(),
+            "created_at": utcnow().isoformat(),
         })
 
         requests_file = SelfHostService.get_requests_file()

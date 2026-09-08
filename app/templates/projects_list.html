@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Мои проекты{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+
+        <div class="mb-10 flex items-center justify-between">
+            <div>
+                <span class="inline-block text-xs font-semibold uppercase tracking-widest text-blue-600 mb-3">Проекты</span>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Мои проекты</h1>
+            </div>
+            <form method="post" action="/projects" class="inline">
+                <button type="submit"
+                        class="inline-flex items-center gap-2 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-7 py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-600/30">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Новый проект
+                </button>
+            </form>
+        </div>
+
+        {% if projects %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for project in projects %}
+                <div class="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-50 transition-all">
+                    <!-- Stretch-ссылка: клик по всей карточке открывает проект -->
+                    <a href="/projects/{{ project.id }}" class="absolute inset-0 z-10 rounded-2xl" aria-label="Открыть проект"></a>
+
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1 pr-2">
+                            <h3 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                                {{ project.org_name or "Без названия" }}
+                            </h3>
+                            <p class="text-sm text-gray-500">
+                                {% if project.doc_date %}
+                                    от {{ project.doc_date }}
+                                {% else %}
+                                    создан <time data-utc="{{ project.created_at | iso_utc }}" data-format="date"></time>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ project.status_class }}">
+                            {{ project.status_label }}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1">Работников</p>
+                            <p class="text-base font-semibold text-gray-900">{{ project.workers_count }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1">Сгенерировано</p>
+                            <p class="text-base font-semibold text-gray-900">{{ project.generated_count }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-5 border-t border-gray-100 flex items-center justify-between">
+                        <p class="text-xs text-gray-400">
+                            Обновлён <time data-utc="{{ project.updated_at | iso_utc }}" data-format="datetime"></time>
+                        </p>
+                        <!-- Удаление проекта: лежит поверх stretch-ссылки -->
+                        <form method="post"
+                              action="/projects/{{ project.id }}/delete"
+                              class="relative z-20"
+                              onsubmit="return confirm('Удалить проект? Все данные и файлы будут удалены безвозвратно.');">
+                            <button type="submit"
+                                    class="text-gray-400 hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-red-50"
+                                    title="Удалить проект">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-16 bg-white border border-gray-200 rounded-2xl">
+            <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-5">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Пока нет проектов</h3>
+            <p class="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+                Создайте первый проект, чтобы начать работу с оценкой профессиональных рисков.
+            </p>
+            <form method="post" action="/projects" class="inline">
+                <button type="submit"
+                        class="inline-flex items-center gap-2 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-7 py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 hover:shadow-blue-600/30">
+                    Создать первый проект
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

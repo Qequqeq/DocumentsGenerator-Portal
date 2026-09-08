@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import get_settings
 from app.database import get_db
 from app.modules.auth.dependencies import get_current_user, get_current_user_id
 from app.modules.auth.models import User
 from app.modules.subscriptions.models import Subscription, PLAN_LABELS
 from app.modules.subscriptions.service import SubscriptionService
+from app.shared.templating import templates
 
 router = APIRouter()
-
-settings = get_settings()
-templates = Jinja2Templates(directory=str(settings.templates_dir))
 
 
 @router.get("/account")

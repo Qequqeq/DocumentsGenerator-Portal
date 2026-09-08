@@ -3,7 +3,6 @@ from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,11 +11,9 @@ from app.database import get_db
 from app.modules.auth.models import User
 from app.modules.auth.dependencies import get_current_user
 from app.modules.auth.service import PasswordService, SessionService
+from app.shared.templating import templates, settings
 
 router = APIRouter()
-
-settings = get_settings()
-templates = Jinja2Templates(directory=str(settings.templates_dir))
 
 
 REGISTER_ERRORS = {

@@ -24,7 +24,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 mb-1">Аккаунт создан</p>
-                        <p class="text-base font-semibold text-gray-900">{{ created_at.strftime('%d.%m.%Y') }}</p>
+                        <p class="text-base font-semibold text-gray-900"><time data-utc="{{ created_at | iso_utc }}" data-format="date"></time></p>
                     </div>
                 </div>
 
@@ -67,11 +67,11 @@
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div>
                                 <p class="text-xs text-gray-500 mb-1">Начало</p>
-                                <p class="text-sm font-semibold text-gray-900">{{ subscription.started_at.strftime('%d.%m.%Y') }}</p>
+                                <p class="text-sm font-semibold text-gray-900"><time data-utc="{{ subscription.started_at | iso_utc }}" data-format="date"></time></p>
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500 mb-1">Действует до</p>
-                                <p class="text-sm font-semibold text-gray-900">{{ subscription.expires_at.strftime('%d.%m.%Y') }}</p>
+                                <p class="text-sm font-semibold text-gray-900"><time data-utc="{{ subscription.expires_at | iso_utc }}" data-format="date"></time></p>
                             </div>
                         </div>
 
@@ -142,6 +142,22 @@
         <div class="mt-8 bg-white border border-gray-200 rounded-2xl p-6">
             <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-4">Доступные разделы</h2>
             <div class="grid sm:grid-cols-3 gap-4">
+                <a href="/projects" class="group block bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-xl p-5 transition-all">
+                    <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center mb-3 group-hover:bg-blue-100 transition-colors">
+                        <svg class="w-5 h-5 text-gray-700 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-900 mb-1">Мои проекты</p>
+                    <p class="text-xs text-gray-500">Создавайте и управляйте проектами оценки рисков</p>
+                </a>
+                <a href="/settings" class="group block bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-xl p-5 transition-all">
+                    <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center mb-3 group-hover:bg-blue-100 transition-colors">
+                        <svg class="w-5 h-5 text-gray-700 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-900 mb-1">Настройки</p>
+                    <p class="text-xs text-gray-500">Описания, диапазоны и меры (по подписке)</p>
+                </a>
                 <a href="/" class="group block bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-xl p-5 transition-all">
                     <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center mb-3 group-hover:bg-blue-100 transition-colors">
                         <svg class="w-5 h-5 text-gray-700 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

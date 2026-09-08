@@ -19,7 +19,7 @@
 
         {% if subscription %}
         <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-            У вас уже есть активная подписка «{{ plan_labels[subscription.plan] }}» до {{ subscription.expires_at.strftime('%d.%m.%Y') }}. Оформление новой подписки заменит текущую.
+            У вас уже есть активная подписка «{{ plan_labels[subscription.plan] }}» до <time data-utc="{{ subscription.expires_at | iso_utc }}" data-format="date"></time>. Оформление новой подписки заменит текущую.
         </div>
         {% endif %}
 
