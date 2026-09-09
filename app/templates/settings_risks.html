@@ -1,76 +1,132 @@
 {% extends "base.html" %}
 
-{% block title %}Настройка рисков — АвтоРиск{% endblock %}
+{% block title %}Настройка рисков{% endblock %}
 
 {% block content %}
 
-<!-- Основная колонка: риски по центру -->
-<div class="max-w-3xl mx-auto px-6 pt-10 pb-36">
-
-    <div class="mb-6">
-        <span class="inline-block text-xs font-semibold uppercase tracking-widest text-blue-600 mb-2">Настройки</span>
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Настройка рисков</h1>
-        <p class="text-sm text-gray-500">Отредактируйте меры противодействия для каждого риска. Каждая мера пишется с новой строки. Изменения применятся при следующей генерации документов.</p>
-    </div>
+<div class="py-28 px-8">
+    <div class="max-w-3xl mx-auto px-6">
+    <a href="/settings" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        К настройкам
+    </a>
+    <header class="mb-8">
+        <h1 class="text-3xl font-bold text-slate-900 mb-2">Настройка рисков</h1>
+        <p class="text-base text-slate-500 max-w-xl">
+            Отредактируйте меры противодействия для каждого риска. Каждая мера пишется с новой строки. Изменения применятся при следующей генерации документов.
+        </p>
+    </header>
 
     {% if saved %}
-    <div class="mb-5 text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">
-        Сохранено. Изменения применятся при следующей генерации документов.
+    <div class="mb-6 bg-white border border-slate-200 border-l-4 border-l-green-500 px-5 py-4">
+        <p class="text-sm font-semibold text-slate-900 mb-1">Сохранено</p>
+        <p class="text-sm text-slate-600">Изменения применятся при следующей генерации документов.</p>
     </div>
     {% endif %}
 
-    <form method="post" action="/settings/risks" class="space-y-6">
+    <form method="post" action="/settings/risks" id="risksSettingsForm">
 
         {% for danger in dangers %}
-        <section id="danger-{{ danger.danger_number }}" class="scroll-mt-24 bg-white border border-gray-200 rounded-xl p-6">
-            <div class="flex items-center gap-3 mb-5">
-                <span class="w-9 h-9 shrink-0 rounded-lg bg-slate-800 text-white flex items-center justify-center text-sm font-bold">{{ danger.danger_number }}</span>
-                <h2 class="text-base font-semibold text-gray-900 leading-snug">{{ danger.danger_name }}</h2>
+        <div class="danger-section {% if not loop.first %}hidden{% endif %}" data-danger-id="{{ danger.danger_number }}">
+            <div class="mb-6">
+                <div class="flex items-baseline gap-3">
+                    <span class="text-sm font-bold text-blue-600 tabular-nums">{{ danger.danger_number }}</span>
+                    <h2 class="text-xl font-semibold text-slate-900">{{ danger.danger_name }}</h2>
+                </div>
             </div>
 
             <div class="space-y-4">
                 {% for risk in danger.risks %}
-                <div class="{% if not loop.first %}border-t border-gray-100 pt-4{% endif %}">
-                    <div class="flex items-baseline gap-2 mb-2">
-                        <span class="text-xs font-bold text-blue-600 shrink-0">{{ risk.risk_number }}</span>
-                        <p class="text-sm text-gray-700 leading-snug">{{ risk.risk_name }}</p>
+                <div class="risk-card bg-white border border-slate-200 p-5">
+                    <div class="mb-4">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-sm font-medium text-slate-500 tabular-nums">{{ risk.risk_number }}</span>
+                            <h3 class="text-base font-semibold text-slate-900">{{ risk.risk_name }}</h3>
+                        </div>
                     </div>
-                    <label class="block text-[11px] text-gray-500 mb-1">Меры противодействия (каждая с новой строки)</label>
-                    <textarea name="measures_{{ risk.risk_number }}" rows="3"
-                              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm leading-relaxed text-gray-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100 resize-y">{{ risk.measures_text }}</textarea>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-2">Меры противодействия (каждая с новой строки)</label>
+                        <textarea name="measures_{{ risk.risk_number }}" rows="4"
+                                  class="w-full bg-white border border-slate-300 px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">{{ risk.measures_text }}</textarea>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
-        </section>
+        </div>
         {% endfor %}
 
-        <div class="flex items-center gap-4">
-            <button type="submit"
-                    class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg transition-colors">
-                Сохранить изменения
-            </button>
-            <a href="/settings" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">К настройкам</a>
+        <div class="flex flex-wrap items-center gap-3 pt-8 mt-8 border-t border-slate-200">
+            <button type="submit" class="w-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition-colors">Сохранить изменения</button>
         </div>
+
     </form>
 
     <form method="post" action="/settings/reset-risks" class="mt-4">
-        <button type="submit" class="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Восстановить значения по умолчанию</button>
-        <p class="text-xs text-gray-400 mt-1">Сбрасывает только меры противодействия рискам. Описания и диапазоны не затрагиваются.</p>
-    </form>
-
-</div>
-
-<!-- Нижний «овальчик» с опасностями (как в worker_risks) -->
-<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 max-w-[92vw]">
-    <div class="bg-white/95 backdrop-blur border border-gray-200 rounded-full shadow-xl px-5 py-2.5 flex items-center gap-2 overflow-x-auto">
-        <span class="text-xs font-semibold text-gray-500 shrink-0">Опасности</span>
-        {% for danger in dangers %}
-        <a href="#danger-{{ danger.danger_number }}"
-           class="shrink-0 px-3 py-1 rounded-full bg-gray-100 text-xs font-bold text-gray-600 hover:bg-blue-100 hover:text-blue-700 transition-colors">
-            {{ danger.danger_number }}
-        </a>
-        {% endfor %}
+            <button type="submit" class="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Восстановить значения по умолчанию</button>
+            <p class="text-xs text-gray-400 mt-1">Сбрасывает только меры противодействия рискам.</p>
+        </form>
     </div>
 </div>
+
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-5xl px-4 pointer-events-none">
+    <div class="pointer-events-auto bg-white border border-slate-200 shadow-xl rounded-3xl px-6 py-4">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-sm font-semibold text-slate-900">Опасности</h2>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            {% for danger in dangers %}
+            <button type="button"
+                    class="danger-pill bg-white border border-slate-300 text-slate-700 px-3 py-1.5 rounded-full text-xs font-medium transition-colors hover:border-blue-500"
+                    data-danger-id="{{ danger.danger_number }}"
+                    title="{{ danger.danger_name }}">
+                <span class="font-bold">{{ danger.danger_number }}</span>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var currentDanger = null;
+    var pills = document.querySelectorAll('.danger-pill');
+    var sections = document.querySelectorAll('.danger-section');
+
+    function switchToDanger(dangerId) {
+        sections.forEach(function(section) {
+            if (section.getAttribute('data-danger-id') === dangerId) {
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+            }
+        });
+
+        pills.forEach(function(pill) {
+            if (pill.getAttribute('data-danger-id') === dangerId) {
+                pill.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                pill.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
+                currentDanger = dangerId;
+            } else {
+                pill.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                pill.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
+            }
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    pills.forEach(function(pill) {
+        pill.addEventListener('click', function() {
+            var dangerId = this.getAttribute('data-danger-id');
+            switchToDanger(dangerId);
+        });
+    });
+
+    if (pills.length > 0) {
+        switchToDanger(pills[0].getAttribute('data-danger-id'));
+    }
+})();
+</script>
 
 {% endblock %}
