@@ -16,3 +16,4 @@ app.db
 *.log
 .DS_Store
 .vscode/
+app/uploads/
