@@ -42,12 +42,14 @@ def create_app() -> FastAPI:
     from app.modules.subscriptions.router import router as subscriptions_router
     from app.modules.projects.router import router as projects_router
     from app.modules.settings.router import router as settings_router
+    from app.modules.templates.router import router as templates_router
 
     app.include_router(landing_router)
     app.include_router(auth_router)
     app.include_router(subscriptions_router)
     app.include_router(projects_router)
     app.include_router(settings_router)
+    app.include_router(templates_router)
     # TODO: в следующих шагах подключим остальные роутеры
     # from app.modules.subscriptions.router import router as subscriptions_router
     # app.include_router(subscriptions_router)

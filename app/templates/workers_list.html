@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Работники организации{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-4xl mx-auto px-6">
+
+        <a href="/projects/{{ project.id }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            К данным проекта
+        </a>
+
+        <div class="mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Работники организации</h1>
+            <p class="text-sm text-gray-500">Этап 2 из 3 · Выберите работника для заполнения рисков или примените шаблон к нескольким работникам одновременно.</p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mb-8">
+            <a href="/projects/{{ project.id }}" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">1. Данные</a>
+            <a href="/projects/{{ project.id }}/workers" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-600 text-white">2. Риски</a>
+            <a href="/projects/{{ project.id }}/results" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-gray-100 text-gray-400 hover:border-blue-300 hover:text-blue-600 border border-transparent transition-colors">3. Результат</a>
+        </div>
+
+        {% if saved %}
+        <div class="mb-6 text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">Шаблоны применены / риски сохранены.</div>
+        {% endif %}
+        {% if error == 'unfilled' %}
+        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">
+            Невозможно сформировать отчёт. Не заполнены карты: {{ msg }}. Заполните все карты перед генерацией.
+        </div>
+        {% endif %}
+        {% if error == 'apply_args' %}
+        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Выберите работников и файл шаблона (.json).</div>
+        {% endif %}
+        {% if error == 'apply_json' %}
+        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Некорректный файл шаблона: ожидается JSON с полем «risks».</div>
+        {% endif %}
+
+        {% if workers %}
+        <form method="post" action="/projects/{{ project.id }}/workers/apply-template" enctype="multipart/form-data"
+              class="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
+            <div class="overflow-x-auto mb-5">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-xs text-gray-500 border-b border-gray-100">
+                            <th class="py-2 pr-3 w-8"></th>
+                            <th class="py-2 pr-3 font-semibold">Работник</th>
+                            <th class="py-2 pr-3 font-semibold">Суммарный риск</th>
+                            <th class="py-2 pr-3 font-semibold">Статус</th>
+                            <th class="py-2 font-semibold text-right">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for w in workers %}
+                        {% set st = stats.get(w.ID, {}) %}
+                        <tr class="border-b border-gray-50">
+                            <td class="py-2.5 pr-3">
+                                <input type="checkbox" name="worker_indices" value="{{ loop.index0 }}" class="worker-check w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            </td>
+                            <td class="py-2.5 pr-3">
+                                <p class="text-gray-800 font-medium">{{ w.ID }}. {{ w.position }}</p>
+                                {% if w.division %}<p class="text-xs text-gray-400">{{ w.division|join(' / ') }}</p>{% endif %}
+                            </td>
+                            <td class="py-2.5 pr-3 text-gray-700 font-semibold">{{ st.total if st else 0.0 }}</td>
+                            <td class="py-2.5 pr-3">
+                                {% if st and st.filled %}
+                                <span class="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-full">Заполнен</span>
+                                {% else %}
+                                <span class="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Не заполнен</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-2.5 text-right">
+                                <a href="/projects/{{ project.id }}/workers/{{ loop.index0 }}/risks"
+                                   class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                                    Заполнить вручную
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 pt-4 border-t border-gray-100">
+                <span class="text-xs font-semibold text-gray-500 shrink-0">Выбрано: <span id="selected-count">0</span></span>
+                <input type="file" name="template_file" accept=".json"
+                       class="flex-1 text-xs text-gray-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:text-xs file:font-semibold hover:file:bg-blue-100 file:transition-colors">
+                <button type="submit" class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-lg transition-colors">
+                    Применить к выбранным
+                </button>
+            </div>
+            <div class="flex gap-3 mt-3">
+                <button type="button" id="select-all" class="text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors">Выбрать всех</button>
+                <button type="button" id="select-none" class="text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors">Снять выделение</button>
+            </div>
+        </form>
+
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="/projects/{{ project.id }}/generate"
+               class="inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-6 py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20">
+                Сформировать все отчёты
+            </a>
+            <a href="/projects/{{ project.id }}/save-project"
+               class="inline-flex items-center justify-center gap-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:border-gray-400 hover:bg-gray-50 px-6 py-3 rounded-xl transition-colors">
+                Сохранить проект
+            </a>
+        </div>
+        {% else %}
+        <div class="bg-white border border-gray-200 rounded-2xl p-10 text-center">
+            <p class="text-sm text-gray-500 mb-4">Список работников пуст. Вернитесь на этап 1 и добавьте сотрудников вручную или загрузите файл.</p>
+            <a href="/projects/{{ project.id }}" class="inline-flex items-center gap-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg transition-colors">К заполнению данных</a>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<script>
+function updateCount() {
+    document.getElementById('selected-count').textContent =
+        document.querySelectorAll('.worker-check:checked').length;
+}
+document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('worker-check')) updateCount();
+});
+document.getElementById('select-all')?.addEventListener('click', function () {
+    document.querySelectorAll('.worker-check').forEach(function (c) { c.checked = true; });
+    updateCount();
+});
+document.getElementById('select-none')?.addEventListener('click', function () {
+    document.querySelectorAll('.worker-check').forEach(function (c) { c.checked = false; });
+    updateCount();
+});
+updateCount();
+</script>
+{% endblock %}

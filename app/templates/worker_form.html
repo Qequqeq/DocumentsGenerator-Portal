@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Сотрудник: ' ~ worker.position if is_edit else 'Новый сотрудник' }}{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-2xl mx-auto px-6">
+
+        <a href="/projects/{{ project.id }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            К проекту
+        </a>
+
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+            {{ 'Сотрудник: ' ~ worker.position if is_edit else 'Новый сотрудник' }}
+        </h1>
+
+        {% for error in errors %}
+        <div class="mb-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{{ error }}</div>
+        {% endfor %}
+
+        <form method="post"
+              action="{% if is_edit %}/projects/{{ project.id }}/workers/{{ idx }}/edit{% else %}/projects/{{ project.id }}/workers/new{% endif %}"
+              class="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">№ (ID)</label>
+                    <input type="text" name="ID" value="{{ worker.get('ID', '') }}" placeholder="Авто-нумерация, если пусто"
+                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Подразделение</label>
+                    <input type="text" name="division" value="{{ worker.division|join(' / ') if worker.get('division') else '' }}" placeholder="Через / для вложенности"
+                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Должность <span class="text-red-500">*</span></label>
+                <input type="text" name="position" value="{{ worker.get('position', '') }}" required
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Кол-во</label>
+                    <input type="number" min="0" name="number_at_workplace" value="{{ worker.get('number_at_workplace', 1) }}"
+                           class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Женщин</label>
+                    <input type="number" min="0" name="woman" value="{{ worker.get('woman', 0) }}"
+                           class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Несоверш.</label>
+                    <input type="number" min="0" name="minors" value="{{ worker.get('minors', 0) }}"
+                           class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Инвалидов</label>
+                    <input type="number" min="0" name="disabled" value="{{ worker.get('disabled', 0) }}"
+                           class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Используемое оборудование</label>
+                <input type="text" name="equipment" value="{{ worker.get('equipment', '') }}"
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Применяемые сырье и материалы</label>
+                <input type="text" name="materials" value="{{ worker.get('materials', '') }}"
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+            </div>
+
+            <div class="pt-2 flex items-center gap-4">
+                <button type="submit" class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg transition-colors">
+                    {{ 'Сохранить изменения' if is_edit else 'Добавить сотрудника' }}
+                </button>
+                <a href="/projects/{{ project.id }}" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Отмена</a>
+            </div>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

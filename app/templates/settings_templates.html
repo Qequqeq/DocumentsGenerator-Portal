@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Мои шаблоны{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-3xl mx-auto px-6">
+        <div class="mb-8">
+            <a href="/settings" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                К настройкам
+            </a>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Мои шаблоны документов</h1>
+            <p class="text-sm text-gray-500">По умолчанию используются шаблоны сервиса. С подпиской можно загрузить свои шаблоны карты и отчёта — они будут применяться при генерации вместо стандартных.</p>
+        </div>
+
+        {% if saved %}
+        <div class="mb-6 text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">Сохранено.</div>
+        {% endif %}
+        {% if error %}
+        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{{ error }}</div>
+        {% endif %}
+
+        <div class="grid md:grid-cols-2 gap-6">
+
+            <!-- Шаблон карты -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                <h2 class="text-base font-semibold text-gray-900 mb-4">Шаблон карты</h2>
+
+                <div class="mb-4">
+                    <p class="text-xs text-gray-500 mb-1">По умолчанию</p>
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm font-medium text-gray-800">card_template.docx</p>
+                        {% if default_card_exists %}
+                        <span class="text-[10px] font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">файл найден</span>
+                        {% else %}
+                        <span class="text-[10px] font-semibold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">файл не найден</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if is_premium %}
+                    {% if custom_card %}
+                    <div class="mb-4 border border-blue-100 bg-blue-50 rounded-xl px-4 py-3">
+                        <p class="text-xs text-gray-500 mb-1">Ваш шаблон (активен)</p>
+                        <p class="text-sm font-semibold text-gray-900 mb-2 break-all">{{ custom_card.original_name }}</p>
+                        <form method="post" action="/settings/templates/delete">
+                            <input type="hidden" name="kind" value="card">
+                            <button type="submit" class="text-xs font-medium text-red-600 hover:text-red-700 transition-colors">Удалить и вернуться к стандартному</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                    <form method="post" action="/settings/templates/upload" enctype="multipart/form-data" class="space-y-3">
+                        <input type="hidden" name="kind" value="card">
+                        <input type="file" name="file" accept=".docx" required
+                               class="w-full text-xs text-gray-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:text-xs file:font-semibold hover:file:bg-blue-100 file:transition-colors">
+                        <button type="submit" class="w-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-lg transition-colors">Загрузить свой шаблон</button>
+                    </form>
+                {% else %}
+                    <div class="border border-dashed border-gray-300 rounded-xl px-4 py-5 text-center">
+                        <p class="text-xs text-gray-500 mb-3">Загрузка своих шаблонов доступна по подписке.</p>
+                        <a href="/subscribe" class="text-xs font-semibold text-blue-600 hover:text-blue-700">Оформить подписку</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Шаблон отчёта -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                <h2 class="text-base font-semibold text-gray-900 mb-4">Шаблон отчёта</h2>
+
+                <div class="mb-4">
+                    <p class="text-xs text-gray-500 mb-1">По умолчанию</p>
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm font-medium text-gray-800">report_template.docx</p>
+                        {% if default_report_exists %}
+                        <span class="text-[10px] font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">файл найден</span>
+                        {% else %}
+                        <span class="text-[10px] font-semibold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">файл не найден</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if is_premium %}
+                    {% if custom_report %}
+                    <div class="mb-4 border border-blue-100 bg-blue-50 rounded-xl px-4 py-3">
+                        <p class="text-xs text-gray-500 mb-1">Ваш шаблон (активен)</p>
+                        <p class="text-sm font-semibold text-gray-900 mb-2 break-all">{{ custom_report.original_name }}</p>
+                        <form method="post" action="/settings/templates/delete">
+                            <input type="hidden" name="kind" value="report">
+                            <button type="submit" class="text-xs font-medium text-red-600 hover:text-red-700 transition-colors">Удалить и вернуться к стандартному</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                    <form method="post" action="/settings/templates/upload" enctype="multipart/form-data" class="space-y-3">
+                        <input type="hidden" name="kind" value="report">
+                        <input type="file" name="file" accept=".docx" required
+                               class="w-full text-xs text-gray-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:text-xs file:font-semibold hover:file:bg-blue-100 file:transition-colors">
+                        <button type="submit" class="w-full text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-lg transition-colors">Загрузить свой шаблон</button>
+                    </form>
+                {% else %}
+                    <div class="border border-dashed border-gray-300 rounded-xl px-4 py-5 text-center">
+                        <p class="text-xs text-gray-500 mb-3">Загрузка своих шаблонов доступна по подписке.</p>
+                        <a href="/subscribe" class="text-xs font-semibold text-blue-600 hover:text-blue-700">Оформить подписку</a>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Оплата отчёта{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-xl mx-auto px-6">
+
+        <a href="/projects/{{ project.id }}/results" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            К результату
+        </a>
+
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Оплата отчёта</h1>
+        <p class="text-sm text-gray-500 mb-8">
+            {{ project.org_name or 'Проект' }} · работников в отчёте: {{ project.workers_count }}
+        </p>
+
+        <!-- Счёт -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
+            <h2 class="text-base font-semibold text-gray-900 mb-4">Счёт</h2>
+            <div class="space-y-3 text-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-600">Формирование отчёта (до {{ price.included_workers }} должностей)</span>
+                    <span class="font-semibold text-gray-900">{{ price.base_price }} ₽</span>
+                </div>
+                {% if price.extra_workers %}
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-600">Дополнительные должности: {{ price.extra_workers }} × {{ 50 }} ₽</span>
+                    <span class="font-semibold text-gray-900">{{ price.extra_price }} ₽</span>
+                </div>
+                {% endif %}
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <span class="text-base font-semibold text-gray-900">Итого</span>
+                    <span class="text-xl font-bold text-gray-900">{{ price.total }} ₽</span>
+                </div>
+            </div>
+
+            <form method="post" action="/projects/{{ project.id }}/pay" class="mt-6">
+                <button type="submit"
+                        class="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/20">
+                    Оплатить и скачать
+                </button>
+            </form>
+            <p class="text-xs text-gray-400 mt-3 text-center">
+                Сейчас оплата работает в тестовом режиме: кнопка сразу разблокирует скачивание.
+                Приём настоящих платежей подключается следующим шагом.
+            </p>
+        </div>
+
+        <!-- Альтернативы -->
+        <div class="space-y-3">
+            <a href="/subscribe"
+               class="block bg-white border border-gray-200 rounded-2xl p-5 hover:border-blue-300 hover:bg-blue-50 transition-all">
+                <p class="text-sm font-semibold text-gray-900 mb-1">Выгоднее с подпиской — от 5 000 ₽/мес</p>
+                <p class="text-xs text-gray-500">Безлимитные отчёты и должности, кастомизация шаблонов и диапазонов. Если отчётов будет больше одного — подписка окупается сразу.</p>
+            </a>
+            <a href="/projects/{{ project.id }}/save-project"
+               class="block bg-white border border-gray-200 rounded-2xl p-5 hover:border-blue-300 hover:bg-blue-50 transition-all">
+                <p class="text-sm font-semibold text-gray-900 mb-1">Сохранить проект бесплатно</p>
+                <p class="text-xs text-gray-500">Скачать архив с заполненными рисками (JSON), чтобы продолжить работу позже или оплатить после.</p>
+            </a>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

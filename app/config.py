@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     base_dir: Path = Path(__file__).parent
     templates_dir: Path = base_dir / "templates"
     static_dir: Path = base_dir / "static"
+    defaults_dir: Path = base_dir / "assets" / "defaults"
+    org_templates_dir: Path = base_dir / "assets" / "org_templates"
 
     model_config = SettingsConfigDict(
         env_file=".env",

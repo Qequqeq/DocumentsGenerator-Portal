@@ -51,6 +51,7 @@ async def init_db() -> None:
     from app.modules.subscriptions.models import Subscription  # noqa: F401
     from app.modules.projects.models import Project  # noqa: F401
     from app.modules.settings.models import UserCustomization  # noqa: F401
+    from app.modules.templates.models import CustomTemplate  # noqa: F401
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
