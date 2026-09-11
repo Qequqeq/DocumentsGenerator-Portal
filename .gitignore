@@ -17,4 +17,4 @@ app.db
 .DS_Store
 .vscode/
 app/uploads/*
-app/uploads/.gitkeep
+!app/uploads/.gitkeep
