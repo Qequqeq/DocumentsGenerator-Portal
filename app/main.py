@@ -7,7 +7,6 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.database import init_db
-from app.modules.landing.router import router as landing_router
 
 from fastapi import Request
 from fastapi.responses import RedirectResponse
@@ -28,7 +27,6 @@ def create_app() -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
-
     @app.exception_handler(RedirectException)
     async def redirect_exception_handler(request: Request, exc: RedirectException):
         return RedirectResponse(url=exc.url, status_code=exc.status_code)
@@ -36,7 +34,6 @@ def create_app() -> FastAPI:
     settings.static_dir.mkdir(parents=True, exist_ok=True)
     app.mount("/static", StaticFiles(directory=str(settings.static_dir)), name="static")
 
-    # Подключаем роутеры
     from app.modules.landing.router import router as landing_router
     from app.modules.auth.router import router as auth_router
     from app.modules.subscriptions.router import router as subscriptions_router
@@ -44,21 +41,12 @@ def create_app() -> FastAPI:
     from app.modules.settings.router import router as settings_router
     from app.modules.templates.router import router as templates_router
 
-    app.include_router(landing_router)
-    app.include_router(auth_router)
-    app.include_router(subscriptions_router)
-    app.include_router(projects_router)
-    app.include_router(settings_router)
-    app.include_router(templates_router)
-    # TODO: в следующих шагах подключим остальные роутеры
-    # from app.modules.subscriptions.router import router as subscriptions_router
-    # app.include_router(subscriptions_router)
-    # from app.modules.landing.router import router as landing_router
-    # from app.modules.auth.router import router as auth_router
-    # from app.modules.subscriptions.router import router as subscriptions_router
-    # app.include_router(landing_router)
-    # app.include_router(auth_router)
-    # app.include_router(subscriptions_router)
+    app.include_router(landing_router, tags=["landing"])
+    app.include_router(auth_router, tags=["authentication"])
+    app.include_router(subscriptions_router, tags=["subscription"])
+    app.include_router(projects_router, tags=["project"])
+    app.include_router(settings_router, tags=["settings"])
+    app.include_router(templates_router, tags=["templates"])
 
     return app
 
