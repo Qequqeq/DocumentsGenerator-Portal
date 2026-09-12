@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -35,9 +36,12 @@ class Subscription(TimestampMixin, Base):
         default="active",
         nullable=False,
     )
+    promo_code: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    price: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
     user = relationship("User", back_populates="subscriptions")
 
 PLAN_LABELS = {
-    "monthly": "Продвинутый: 5 000 ₽ / месяц",
-    "yearly": "Продвинутый: 50 000 ₽ / год (2 месяца бесплатно)",
+    "monthly": "Продвинутый: 5 000 руб./месяц",
+    "yearly": "Продвинутый: 50 000 руб./год",
 }

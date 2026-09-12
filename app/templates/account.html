@@ -10,6 +10,9 @@
             <span class="inline-block text-xs font-semibold uppercase tracking-widest text-blue-600 mb-3">Личный кабинет</span>
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Здравствуйте, {{ email.split('@')[0] }}</h1>
         </div>
+        {% if msg == 'sub_activated' %}
+            <div class="mb-8 text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">Подписка активирована.</div>
+        {% endif %}
 
         <div class="grid lg:grid-cols-3 gap-6">
 
@@ -73,6 +76,20 @@
                                 <p class="text-xs text-gray-500 mb-1">Действует до</p>
                                 <p class="text-sm font-semibold text-gray-900"><time data-utc="{{ subscription.expires_at | iso_utc }}" data-format="date"></time></p>
                             </div>
+                            {% if subscription.price is not none %}
+                            <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-blue-100">
+                                <div>
+                                    <p class="text-xs text-gray-500 mb-1">Стоимость</p>
+                                    <p class="text-sm font-semibold text-gray-900">{{ subscription.price }} ₽</p>
+                                </div>
+                                {% if subscription.promo_code %}
+                                <div>
+                                    <p class="text-xs text-gray-500 mb-1">Промокод</p>
+                                    <p class="text-sm font-semibold text-green-600">{{ subscription.promo_code }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
                         </div>
 
                         <!-- Кнопка отмены -->

@@ -37,9 +37,11 @@ class SubscriptionService:
 
     @staticmethod
     async def create_subscription(
-        db: AsyncSession,
-        user_id: int,
-        plan: str,
+            db: AsyncSession,
+            user_id: int,
+            plan: str,
+            promo_code: Optional[str] = None,
+            price: Optional[int] = None,
     ) -> Subscription:
         await db.execute(
             update(Subscription)
@@ -64,6 +66,8 @@ class SubscriptionService:
             started_at=now,
             expires_at=expires_at,
             status="active",
+            promo_code=promo_code,
+            price=price,
         )
         db.add(subscription)
         await db.flush()
