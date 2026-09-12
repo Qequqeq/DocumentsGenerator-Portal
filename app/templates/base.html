@@ -208,16 +208,47 @@ window.addEventListener('load', function () {
 
         <div class="flex items-center gap-3">
             {% if current_user_email %}
-                <a href="/account" class="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
-                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+            <!-- Кнопка с выпадающим меню аккаунта -->
+            <div class="relative" id="account-menu-wrap">
+                <button type="button" id="account-menu-button" aria-haspopup="true" aria-expanded="false"
+                        class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors px-2 py-1.5 rounded-lg hover:bg-gray-100">
+                    <span class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
                         {{ current_user_email[0] | upper }}
-                    </div>
+                    </span>
                     <span class="hidden md:inline">Кабинет</span>
-                </a>
-            {% else %}
-                <a href="/login" class="hidden sm:inline-block text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">Войти</a>
-            {% endif %}
+                    <svg id="account-menu-chevron" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                <div id="account-menu"
+                     class="hidden absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-xl shadow-xl shadow-gray-200/60 py-2 z-50">
+                    <div class="px-4 py-2 border-b border-gray-100 mb-1">
+                        <p class="text-xs text-gray-400">Вы вошли как</p>
+                        <p class="text-sm font-semibold text-gray-800 truncate">{{ current_user_email }}</p>
+                    </div>
+                    <a href="/account"
+                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Личный кабинет
+                    </a>
+                    <div class="border-t border-gray-100 mt-1 pt-1">
+                        <a href="/logout"
+                           class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Выход
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <a href="/login" class="hidden sm:inline-block text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">Войти</a>
             <a href="/#register" class="inline-block text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30">Начать бесплатно</a>
+        {% endif %}
         </div>
 </header>
 
@@ -238,8 +269,8 @@ window.addEventListener('load', function () {
                     </div>
                     <span class="font-bold text-gray-900">АвтоРиск</span>
                 </div>
-                <p class="text-sm text-gray-500 leading-relaxed mb-4">Автоматизация оценки профессиональных рисков. Создано совместно с практикующим аудитором.</p>
-                <a href="mailto:pogosanaleksej710@gmail.com" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">pogosanaleksej710@gmail.com</a>
+                <p class="text-sm text-gray-500 leading-relaxed mb-4">Автоматизация оценки профессиональных рисков.</p>
+                <a href="mailto:pogosanaleksej710@gmail.com" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Свяжитесь с нами pogosanaleksej710@gmail.com</a>
             </div>
             <div>
                 <h3 class="text-sm font-semibold text-gray-900 mb-4">Продукт</h3>
@@ -268,7 +299,6 @@ window.addEventListener('load', function () {
         </div>
         <div class="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p class="text-sm text-gray-400">© 2026 АвтоРиск. Все права защищены.</p>
-            <p class="text-sm text-gray-400">Соответствует требованиям Приказа Минтруда России № 776н</p>
         </div>
     </div>
 </footer>
@@ -303,6 +333,40 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+<script>
+// Выпадающее меню аккаунта в шапке
+(function () {
+    var wrap = document.getElementById('account-menu-wrap');
+    if (!wrap) return; // блок есть только у авторизованных
+    var button = document.getElementById('account-menu-button');
+    var menu = document.getElementById('account-menu');
+    var chevron = document.getElementById('account-menu-chevron');
 
+    function setOpen(open) {
+        menu.classList.toggle('hidden', !open);
+        button.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (chevron) chevron.classList.toggle('rotate-180', open);
+    }
+
+    button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        setOpen(menu.classList.contains('hidden'));
+    });
+
+    // Клик вне меню закрывает его
+    document.addEventListener('click', function (e) {
+        if (!menu.classList.contains('hidden') && !wrap.contains(e.target)) {
+            setOpen(false);
+        }
+    });
+
+    // Escape закрывает меню
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !menu.classList.contains('hidden')) {
+            setOpen(false);
+        }
+    });
+})();
+</script>
 </body>
 </html>
