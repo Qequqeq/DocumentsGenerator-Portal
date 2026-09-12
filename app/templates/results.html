@@ -13,13 +13,14 @@
 
         <div class="mb-6">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-1">Результат</h1>
-            <p class="text-sm text-gray-500">Этап 3 из 3 · {{ project.org_name or 'Проект' }}</p>
+            <p class="text-sm text-gray-500">Этап 4 из 4 · {{ project.org_name or 'Проект' }}</p>
         </div>
 
-        <div class="grid grid-cols-3 gap-2 mb-8">
-            <a href="/projects/{{ project.id }}" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">1. Данные</a>
-            <a href="/projects/{{ project.id }}/workers" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">2. Риски</a>
-            <a href="/projects/{{ project.id }}/results" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-600 text-white">3. Результат</a>
+        <div class="grid grid-cols-4 gap-2 mb-8">
+            <a href="/projects/{{ project.id }}" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">1. Организация</a>
+            <a href="/projects/{{ project.id }}/people" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">2. Сотрудники</a>
+            <a href="/projects/{{ project.id }}/workers" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">3. Риски</a>
+            <a href="/projects/{{ project.id }}/results" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-600 text-white">4. Результат</a>
         </div>
 
         {% if msg == 'gen_pending' %}

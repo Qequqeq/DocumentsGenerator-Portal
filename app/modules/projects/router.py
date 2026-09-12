@@ -143,6 +143,26 @@ async def project_workspace(
     ctx["current_user_email"] = current_user.email
     return templates.TemplateResponse("project_workspace.html", ctx)
 
+@router.get("/projects/{project_id}/people")
+async def people_page(
+    request: Request,
+    current_user: User = Depends(require_authenticated),
+    project: Project = Depends(get_user_project),
+):
+    return templates.TemplateResponse(
+        "people.html",
+        {
+            "request": request,
+            "project": project,
+            "people": project.people_data or [],
+            "excel_errors": [],
+            "saved": request.query_params.get("saved", "") == "1",
+            "open": request.query_params.get("open", ""),
+            "error": request.query_params.get("error", ""),
+            "current_user_email": current_user.email,
+        },
+    )
+
 
 @router.post("/projects/{project_id}/org")
 async def project_org_save(
@@ -216,8 +236,8 @@ async def project_upload_excel(
             project.doc_date = doc_date
         else:
             excel_errors.append(date_error or "Неверный формат даты.")
-    else:
-        excel_errors.append("Укажите дату документа (ДД.ММ.ГГГГ).")
+    elif not project.doc_date:
+        excel_errors.append("Укажите дату документа на этапе 1 («Данные организации»).")
 
     if has_people:
         dest = project_dir / "people.xlsx"
@@ -246,12 +266,31 @@ async def project_upload_excel(
             excel_errors.extend(org_errors)
 
     if excel_errors:
-        ctx = await _workspace_context(request, project, excel_errors=excel_errors)
+        if has_people:
+            return templates.TemplateResponse(
+                "people.html",
+                {
+                    "request": request,
+                    "project": project,
+                    "people": project.people_data or [],
+                    "excel_errors": excel_errors,
+                    "saved": False,
+                    "open": "upload",
+                    "error": "",
+                    "current_user_email": current_user.email,
+                },
+                status_code=400,
+            )
+        ctx = await _workspace_context(request, project, db, excel_errors=excel_errors)
         ctx["current_user_email"] = current_user.email
         return templates.TemplateResponse("project_workspace.html", ctx, status_code=400)
 
     await ProjectRepository.update(db, project)
-    return RedirectResponse(url=f"/projects/{project.id}?saved=1&open=upload", status_code=303)
+    if has_people and not has_org:
+        return RedirectResponse(url=f"/projects/{project.id}/people?saved=1", status_code=303)
+    if has_org and not has_people:
+        return RedirectResponse(url=f"/projects/{project.id}?saved=1&open=upload", status_code=303)
+    return RedirectResponse(url=f"/projects/{project.id}/people?saved=1", status_code=303)
 
 ORG_TEMPLATE_FILES = {
     "people_blank": ("people_card_blank.xlsx", "sheet"),
@@ -391,7 +430,7 @@ async def worker_create(
     project.people_data = people
     project.workers_count = len(people)
     await ProjectRepository.update(db, project)
-    return RedirectResponse(url=f"/projects/{project.id}?saved=1", status_code=303)
+    return RedirectResponse(url=f"/projects/{project.id}/people?saved=1", status_code=303)
 
 
 @router.get("/projects/{project_id}/workers/{idx}/edit")
@@ -457,7 +496,7 @@ async def worker_update(
     project.people_data = people
     project.workers_count = len(people)
     await ProjectRepository.update(db, project)
-    return RedirectResponse(url=f"/projects/{project.id}?saved=1", status_code=303)
+    return RedirectResponse(url=f"/projects/{project.id}/people?saved=1", status_code=303)
 
 
 @router.post("/projects/{project_id}/workers/{idx}/delete")
@@ -473,7 +512,7 @@ async def worker_delete(
         project.people_data = people
         project.workers_count = len(people)
         await ProjectRepository.update(db, project)
-    return RedirectResponse(url=f"/projects/{project.id}?saved=1", status_code=303)
+    return RedirectResponse(url=f"/projects/{project.id}/people?saved=1", status_code=303)
 
 
 @router.get("/projects/{project_id}/workers/{idx}/risks")
@@ -710,7 +749,7 @@ async def project_generate(
 ):
     people = project.people_data or []
     if not people:
-        return RedirectResponse(url=f"/projects/{project.id}?error=no_workers", status_code=303)
+        return RedirectResponse(url=f"/projects/{project.id}/people?error=no_workers", status_code=303)
     stats = await _worker_stats(project, db)
     unfilled = [w["position"] for w in people if not stats.get(str(w["ID"]), {}).get("filled")]
     if unfilled:

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Сотрудники организации{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-4xl mx-auto px-6">
+
+        <a href="/projects/{{ project.id }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            К данным организации
+        </a>
+
+        <div class="mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Сотрудники организации</h1>
+            <p class="text-sm text-gray-500">Этап 2 из 4 · Добавьте сотрудников вручную или загрузите список из Excel.</p>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2 mb-8">
+            <a href="/projects/{{ project.id }}" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">1. Организация</a>
+            <a href="/projects/{{ project.id }}/people" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-600 text-white">2. Сотрудники</a>
+            <a href="/projects/{{ project.id }}/workers" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">3. Риски</a>
+            <a href="/projects/{{ project.id }}/results" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">4. Результат</a>
+        </div>
+
+        {% if saved %}
+        <div class="mb-6 text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">Список сотрудников обновлён.</div>
+        {% endif %}
+        {% if error == 'no_workers' %}
+        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Сначала добавьте сотрудников или загрузите список — без них нельзя сформировать отчёт.</div>
+        {% endif %}
+        {% for excel_error in excel_errors %}
+        <div class="mb-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{{ excel_error }}</div>
+        {% endfor %}
+
+        <!-- Ручное ведение списка -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 mb-4">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-gray-900">Список сотрудников ({{ people|length }})</h2>
+                <a href="/projects/{{ project.id }}/workers/new"
+                   class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    Добавить сотрудника
+                </a>
+            </div>
+
+            {% if people %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-xs text-gray-500 border-b border-gray-100">
+                            <th class="py-2 pr-3 font-semibold">№</th>
+                            <th class="py-2 pr-3 font-semibold">Должность</th>
+                            <th class="py-2 pr-3 font-semibold">Подразделение</th>
+                            <th class="py-2 pr-3 font-semibold">Кол-во</th>
+                            <th class="py-2 pr-3 font-semibold">Женщин</th>
+                            <th class="py-2 pr-3 font-semibold">Несоверш.</th>
+                            <th class="py-2 pr-3 font-semibold">Инвалидов</th>
+                            <th class="py-2 font-semibold text-right">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for w in people %}
+                        <tr class="border-b border-gray-50">
+                            <td class="py-2 pr-3 text-gray-500">{{ w.ID }}</td>
+                            <td class="py-2 pr-3 text-gray-800 font-medium">{{ w.position }}</td>
+                            <td class="py-2 pr-3 text-gray-500">{{ w.division|join(' / ') or '—' }}</td>
+                            <td class="py-2 pr-3 text-gray-500">{{ w.number_at_workplace }}</td>
+                            <td class="py-2 pr-3 text-gray-500">{{ w.woman }}</td>
+                            <td class="py-2 pr-3 text-gray-500">{{ w.minors }}</td>
+                            <td class="py-2 pr-3 text-gray-500">{{ w.disabled }}</td>
+                            <td class="py-2 text-right">
+                                <div class="inline-flex gap-1">
+                                    <a href="/projects/{{ project.id }}/workers/{{ loop.index0 }}/edit"
+                                       class="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="Редактировать">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </a>
+                                    <form method="post" action="/projects/{{ project.id }}/workers/{{ loop.index0 }}/delete"
+                                          onsubmit="return confirm('Удалить сотрудника {{ w.position }}?');">
+                                        <button type="submit" class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Удалить">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-500">Список пуст. Добавьте сотрудников вручную или загрузите файл ниже.</p>
+            {% endif %}
+        </div>
+
+        <!-- Загрузка из Excel -->
+        <details name="people_source" class="group bg-white border border-gray-200 rounded-2xl mb-4" {% if open == 'upload' %}open{% endif %}>
+            <summary class="flex items-center justify-between cursor-pointer px-6 py-4 text-base font-semibold text-gray-900 list-none">
+                Загрузить из Excel
+                <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <form method="post" action="/projects/{{ project.id }}/upload-excel" enctype="multipart/form-data"
+                  class="px-6 pb-6 space-y-4 border-t border-gray-100 pt-4">
+                <p class="text-xs text-gray-500">Загрузка полностью заменит текущий список сотрудников. Дата документа берётся с этапа 1{% if project.doc_date %}: <span class="font-semibold text-gray-700">{{ project.doc_date }}</span>{% else %} (там же её нужно указать){% endif %}.</p>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Список работников (.xlsx)</label>
+                    <input type="file" name="people_file" accept=".xlsx"
+                           class="w-full text-xs text-gray-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:text-xs file:font-semibold hover:file:bg-blue-100 file:transition-colors">
+                </div>
+                <button type="submit"
+                        class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg transition-colors">
+                    Загрузить список работников
+                </button>
+            </form>
+        </details>
+
+        <!-- Образцы -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
+            <h2 class="text-base font-semibold text-gray-900 mb-4">Образцы списка работников</h2>
+            <div class="grid sm:grid-cols-2 gap-3">
+                <a href="/org-templates/download/people_blank" class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 hover:border-blue-300 hover:bg-blue-50 transition-all">
+                    <span class="text-sm font-medium text-gray-800">Список работников — пустой бланк</span>
+                </a>
+                <a href="/org-templates/view/people_pdf" target="_blank" class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 hover:border-blue-300 hover:bg-blue-50 transition-all">
+                    <span class="text-sm font-medium text-gray-800">Список работников — пример (PDF)</span>
+                </a>
+            </div>
+        </div>
+
+        <a href="/projects/{{ project.id }}/workers"
+           class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+            Далее: оценка рисков
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+
+    </div>
+</section>
+{% endblock %}

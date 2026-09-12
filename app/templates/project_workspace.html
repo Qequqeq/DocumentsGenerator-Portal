@@ -13,14 +13,14 @@
 
         <div class="mb-6">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{{ project.org_name or "Новый проект" }}</h1>
-            <p class="text-sm text-gray-500">Этап 1 из 3 · Данные организации и сотрудников</p>
+            <p class="text-sm text-gray-500">Этап 1 из 4 · Данные организации</p>
         </div>
 
-        <!-- Навигация по этапам -->
-        <div class="grid grid-cols-3 gap-2 mb-8">
-            <a href="/projects/{{ project.id }}" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-600 text-white">1. Данные</a>
-            <a href="/projects/{{ project.id }}/workers" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold {{ 'bg-blue-50 text-blue-700 border border-blue-200' if workers_done else 'bg-gray-100 text-gray-400' }} hover:border-blue-300 transition-colors">2. Риски</a>
-            <a href="/projects/{{ project.id }}/results" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-gray-100 text-gray-400 hover:border-blue-300 hover:text-blue-600 border border-transparent transition-colors">3. Результат</a>
+        <div class="grid grid-cols-4 gap-2 mb-8">
+            <a href="/projects/{{ project.id }}" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-600 text-white">1. Организация</a>
+            <a href="/projects/{{ project.id }}/people" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">2. Сотрудники</a>
+            <a href="/projects/{{ project.id }}/workers" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">3. Риски</a>
+            <a href="/projects/{{ project.id }}/results" class="rounded-xl px-3 py-2.5 text-center text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:border-blue-300 transition-colors">4. Результат</a>
         </div>
 
         {% if saved %}
@@ -32,113 +32,96 @@
         {% if error == 'date' %}
         <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{{ msg or 'Неверный формат даты.' }}</div>
         {% endif %}
-        {% if error == 'no_workers' %}
-        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Сначала добавьте сотрудников или загрузите список.</div>
-        {% endif %}
         {% for excel_error in excel_errors %}
         <div class="mb-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{{ excel_error }}</div>
         {% endfor %}
 
-        <!-- Аккордеон: два способа ввода данных -->
-        <details name="data_source" class="group bg-white border border-gray-200 rounded-2xl mb-4" {% if open == 'manual' or (not open and not org_done) %}open{% endif %}>
-            <summary class="flex items-center justify-between cursor-pointer px-6 py-4 text-base font-semibold text-gray-900 list-none">
-                Заполнить вручную
-                <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </summary>
-            <form method="post" action="/projects/{{ project.id }}/org" class="px-6 pb-6 space-y-4 border-t border-gray-100 pt-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Дата документа (ДД.ММ.ГГГГ)</label>
-                    <input type="text" name="doc_date" value="{{ project.doc_date or '' }}" placeholder="01.09.2026"
-                           class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                </div>
+        <!-- Одна форма: дата сверху, два способа ввода через аккордеон -->
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Дата документа (ДД.ММ.ГГГГ)</label>
+                <input type="text" name="doc_date" value="{{ project.doc_date or '' }}" placeholder="01.09.2026"
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+            </div>
 
-                {% for group_title, fields in org_groups %}
-                <div class="pt-2">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">{{ group_title }}</h3>
-                    <div class="space-y-3">
-                        {% for key, label in fields %}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ label }}{% if key == 'full_name' %} <span class="text-red-500">*</span>{% endif %}</label>
-                            <input type="text" name="{{ key }}" value="{{ org_data.get(key, '') }}" {% if key == 'full_name' %}required{% endif %}
-                                   class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+            <details name="data_source" class="group bg-white border border-gray-200 rounded-2xl" {% if open == 'manual' or (not open and not org_done) %}open{% endif %}>
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-4 text-base font-semibold text-gray-900 list-none">
+                    Заполнить вручную
+                    <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <div class="px-6 pb-6 space-y-4 border-t border-gray-100 pt-4">
+                    {% for group_title, fields in org_groups %}
+                    <div class="pt-2">
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">{{ group_title }}</h3>
+                        <div class="space-y-3">
+                            {% for key, label in fields %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ label }}{% if key == 'full_name' %} <span class="text-red-500">*</span>{% endif %}</label>
+                                <input type="text" name="{{ key }}" value="{{ org_data.get(key, '') }}" {% if key == 'full_name' %}required{% endif %}
+                                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                     </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
 
-                <div class="pt-2">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="text-sm font-medium text-gray-700">Члены рабочей группы (должность + Ф.И.О.)</label>
-                        <button type="button" id="add-chairman"
-                                class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                            Добавить ещё
-                        </button>
-                    </div>
-                    {% set poses = org_data.get('chairmen_poses', []) or [] %}
-                    {% set names = org_data.get('chairmen_names', []) or [] %}
-                    {% set pair_count = [poses|length, names|length, 1]|max %}
-                    <div id="chairmen-rows">
-                        {% for i in range(pair_count) %}
-                        <div class="chairman-row flex items-start gap-2 mb-2">
-                            <input type="text" name="chairmen_poses" value="{{ poses[i] if i < poses|length else '' }}" placeholder="Должность"
-                                   class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
-                            <input type="text" name="chairmen_names" value="{{ names[i] if i < names|length else '' }}" placeholder="Ф.И.О."
-                                   class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
-                            <button type="button" data-remove-row class="shrink-0 w-9 h-9 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Убрать">
-                                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                    <div class="pt-2">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-medium text-gray-700">Члены рабочей группы (должность + Ф.И.О.)</label>
+                            <button type="button" id="add-chairman"
+                                    class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                Добавить ещё
                             </button>
                         </div>
-                        {% endfor %}
+                        {% set poses = org_data.get('chairmen_poses', []) or [] %}
+                        {% set names = org_data.get('chairmen_names', []) or [] %}
+                        {% set pair_count = [poses|length, names|length, 1]|max %}
+                        <div id="chairmen-rows">
+                            {% for i in range(pair_count) %}
+                            <div class="chairman-row flex items-start gap-2 mb-2">
+                                <input type="text" name="chairmen_poses" value="{{ poses[i] if i < poses|length else '' }}" placeholder="Должность"
+                                       class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                <input type="text" name="chairmen_names" value="{{ names[i] if i < names|length else '' }}" placeholder="Ф.И.О."
+                                       class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                <button type="button" data-remove-row class="shrink-0 w-9 h-9 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Убрать">
+                                    <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
 
-                <button type="submit" class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg transition-colors">
-                    Сохранить данные организации
-                </button>
-            </form>
-        </details>
-
-        <details name="data_source" class="group bg-white border border-gray-200 rounded-2xl mb-6" {% if open == 'upload' %}open{% endif %}>
-            <summary class="flex items-center justify-between cursor-pointer px-6 py-4 text-base font-semibold text-gray-900 list-none">
-                Загрузить файлы
-                <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </summary>
-            <form method="post" action="/projects/{{ project.id }}/upload-excel" enctype="multipart/form-data"
-                  class="px-6 pb-6 space-y-4 border-t border-gray-100 pt-4">
-                <input type="hidden" name="doc_date" value="{{ project.doc_date or '' }}">
-                {% if project.doc_date %}
-                <p class="text-xs text-gray-500">Дата документа: <span class="font-semibold text-gray-700">{{ project.doc_date }}</span> (задаётся в блоке «Заполнить вручную»).</p>
-                {% else %}
-                <p class="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">Сначала укажите дату документа в блоке «Заполнить вручную» — она обязательна для загрузки.</p>
-                {% endif %}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Список работников (.xlsx)</label>
-                    <input type="file" name="people_file" accept=".xlsx"
-                           class="w-full text-xs text-gray-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:text-xs file:font-semibold hover:file:bg-blue-100 file:transition-colors">
+                    <button type="submit" formaction="/projects/{{ project.id }}/org"
+                            class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg transition-colors">
+                        Сохранить данные организации
+                    </button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Карта организации (.xlsx)</label>
-                    <input type="file" name="org_file" accept=".xlsx"
-                           class="w-full text-xs text-gray-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:text-xs file:font-semibold hover:file:bg-blue-100 file:transition-colors">
-                </div>
-                <button type="submit" class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg transition-colors">
-                    Загрузить и применить
-                </button>
-            </form>
-        </details>
+            </details>
 
-        <!-- Образцы файлов -->
-        <div class="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
-            <h2 class="text-base font-semibold text-gray-900 mb-4">Образцы файлов для заполнения</h2>
+            <details name="data_source" class="group bg-white border border-gray-200 rounded-2xl" {% if open == 'upload' %}open{% endif %}>
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-4 text-base font-semibold text-gray-900 list-none">
+                    Загрузить файл
+                    <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </summary>
+                <div class="px-6 pb-6 space-y-4 border-t border-gray-100 pt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Карта организации (.xlsx)</label>
+                        <input type="file" name="org_file" accept=".xlsx"
+                               class="w-full text-xs text-gray-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:text-xs file:font-semibold hover:file:bg-blue-100 file:transition-colors">
+                    </div>
+                    <button type="submit" formaction="/projects/{{ project.id }}/upload-excel"
+                            class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg transition-colors">
+                        Загрузить карту организации
+                    </button>
+                </div>
+            </details>
+        </form>
+
+        <!-- Образцы -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 mt-6 mb-6">
+            <h2 class="text-base font-semibold text-gray-900 mb-4">Образцы карты организации</h2>
             <div class="grid sm:grid-cols-2 gap-3">
-                <a href="/org-templates/download/people_blank" class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 hover:border-blue-300 hover:bg-blue-50 transition-all">
-                    <span class="text-sm font-medium text-gray-800">Список работников — пустой бланк</span>
-                </a>
-                <a href="/org-templates/view/people_pdf" target="_blank" class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 hover:border-blue-300 hover:bg-blue-50 transition-all">
-                    <span class="text-sm font-medium text-gray-800">Список работников — пример (PDF)</span>
-                </a>
                 <a href="/org-templates/download/org_blank" class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3 hover:border-blue-300 hover:bg-blue-50 transition-all">
                     <span class="text-sm font-medium text-gray-800">Карта организации — пустой бланк</span>
                 </a>
@@ -148,9 +131,9 @@
             </div>
         </div>
 
-        <a href="/projects/{{ project.id }}/workers"
+        <a href="/projects/{{ project.id }}/people"
            class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
-            Далее: сотрудники и риски
+            Далее: сотрудники
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
         </a>
 
