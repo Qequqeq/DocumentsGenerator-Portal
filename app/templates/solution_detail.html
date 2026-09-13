@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}{{ solution.position }}{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-3xl mx-auto px-6">
+
+        <a href="/solutions{% if project %}?project={{ project }}{% endif %}"
+           class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-6">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            К каталогу решений
+        </a>
+
+        <div class="mb-8">
+            <span class="inline-block text-[10px] font-semibold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-1 rounded-full mb-3">{{ category_name }}</span>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{{ solution.position }}</h1>
+            {% if solution.description %}
+            <p class="text-lg text-gray-500 leading-relaxed">{{ solution.description }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Действия -->
+        <div class="flex flex-col sm:flex-row gap-3 mb-8">
+            {% if project %}
+            <a href="/projects/{{ project }}/workers?solution={{ solution.slug }}"
+               class="flex-1 text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition-colors">Применить в проекте</a>
+            {% elif current_user_email %}
+            <a href="/projects"
+               class="flex-1 text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition-colors">Использовать в проекте</a>
+            {% else %}
+            <a href="/login"
+               class="flex-1 text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition-colors">Войти и использовать</a>
+            {% endif %}
+            {% if solution.sample_pdf_path %}
+            <a href="/solutions/{{ solution.slug }}/pdf" target="_blank"
+               class="flex-1 text-center text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:border-gray-400 hover:bg-gray-50 px-6 py-3 rounded-xl transition-colors">Пример карты (PDF)</a>
+            {% endif %}
+        </div>
+
+        <!-- Подробное описание -->
+        {% if solution.detailed_description %}
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
+            <h2 class="text-base font-semibold text-gray-900 mb-3">Описание решения</h2>
+            <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ solution.detailed_description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Состав оценки -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-gray-900">Состав оценки</h2>
+                <span class="text-xs text-gray-400">{{ preview.dangers|length }} групп опасностей · {{ preview.total_risks }} рисков</span>
+            </div>
+
+            {% if preview.dangers %}
+            <div class="space-y-3">
+                {% for danger in preview.dangers %}
+                <details class="group border border-gray-100 rounded-xl" {% if loop.first %}open{% endif %}>
+                    <summary class="flex items-center justify-between cursor-pointer px-4 py-3 list-none">
+                        <span class="flex items-center gap-2.5 text-sm font-semibold text-gray-800">
+                            <span class="px-2 py-0.5 rounded bg-slate-800 text-white text-[11px] font-bold">{{ danger.number }}</span>
+                            {{ danger.name }}
+                        </span>
+                        <span class="flex items-center gap-3">
+                            <span class="text-xs text-gray-400">{{ danger.risks|length }} риск(ов) · итог {{ danger.total }}</span>
+                            <svg class="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </span>
+                    </summary>
+                    <div class="px-4 pb-4">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="text-left text-gray-400 border-b border-gray-100">
+                                    <th class="py-2 pr-2 font-semibold">№</th>
+                                    <th class="py-2 pr-2 font-semibold">Риск</th>
+                                    <th class="py-2 pr-2 font-semibold text-center">Степень</th>
+                                    <th class="py-2 pr-2 font-semibold text-center">Вероятность</th>
+                                    <th class="py-2 pr-2 font-semibold text-center">Коэф.</th>
+                                    <th class="py-2 font-semibold text-right">Риск</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in danger.risks %}
+                                <tr class="border-b border-gray-50">
+                                    <td class="py-2 pr-2 text-blue-600 font-bold align-top">{{ r.number }}</td>
+                                    <td class="py-2 pr-2 text-gray-700">{{ r.name }}</td>
+                                    <td class="py-2 pr-2 text-center text-gray-600">{{ r.deg }}</td>
+                                    <td class="py-2 pr-2 text-center text-gray-600">{{ r.ch }}</td>
+                                    <td class="py-2 pr-2 text-center text-gray-600">{{ r.kef }}</td>
+                                    <td class="py-2 text-right font-semibold text-gray-800">{{ r.value }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-500">Состав оценки появится после загрузки файла шаблона.</p>
+            {% endif %}
+
+            <p class="text-[11px] text-gray-400 mt-4">
+                Файл шаблона не распространяется: применение решения выполняется внутри проекта на странице работников. Множители можно скорректировать после применения.
+            </p>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

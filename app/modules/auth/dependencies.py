@@ -33,3 +33,15 @@ async def require_authenticated(
     if current_user is None:
         raise RedirectException("/#register")
     return current_user
+
+async def require_admin(
+    request: Request,
+    current_user: User = Depends(require_authenticated),
+) -> User:
+    if not getattr(current_user, "is_admin", False):
+        raise RedirectException("/account")
+    from app.modules.admin.security import is_admin_unlocked
+
+    if not is_admin_unlocked(request):
+        raise RedirectException("/admin/unlock")
+    return current_user

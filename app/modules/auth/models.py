@@ -1,5 +1,5 @@
 # В app/modules/auth/models.py
-from sqlalchemy import String
+from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.models import Base, TimestampMixin
@@ -24,3 +24,4 @@ class User(TimestampMixin, Base):
     projects = relationship("Project", back_populates="user", cascade="all, delete-orphan")
     customization = relationship("UserCustomization", back_populates="user", cascade="all, delete-orphan", uselist=False)
     custom_templates = relationship("CustomTemplate", back_populates="user", cascade="all, delete-orphan")
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

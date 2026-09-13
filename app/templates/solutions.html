@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Готовые решения{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+
+        <div class="mb-8">
+            <span class="inline-block text-xs font-semibold uppercase tracking-widest text-blue-600 mb-2">Каталог</span>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Готовые решения</h1>
+            <p class="text-lg text-gray-500">Типовые оценки рисков по должностям: найдите свою, изучите и примените к сотрудникам в проекте. Всего решений: {{ total }}.</p>
+        </div>
+
+        {% if project %}
+        <div class="mb-6 text-sm text-blue-700 bg-blue-50 border border-blue-100 rounded-lg px-4 py-2.5">
+            Вы выбираете решение для проекта. Нажмите «Применить в проекте» на карточке — вернётесь к списку работников с уже выбранным решением.
+        </div>
+        {% endif %}
+
+        <!-- Поиск -->
+        <form method="get" action="/solutions" class="mb-5 flex gap-3 max-w-xl">
+            <input type="text" name="q" value="{{ q }}" placeholder="Поиск по названию должности"
+                   class="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+            {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
+            {% if letter %}<input type="hidden" name="letter" value="{{ letter }}">{% endif %}
+            {% if project %}<input type="hidden" name="project" value="{{ project }}">{% endif %}
+            <button type="submit" class="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-xl transition-colors">Найти</button>
+            {% if q or cat or letter %}
+            <a href="/solutions{% if project %}?project={{ project }}{% endif %}" class="text-sm text-gray-500 hover:text-gray-900 self-center transition-colors">Сбросить</a>
+            {% endif %}
+            {% if msg == 'not_found' %}
+            <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Решение не найдено или не опубликовано.</div>
+            {% endif %}
+        </form>
+
+        <!-- Категории -->
+        <div class="flex flex-wrap gap-2 mb-5">
+            <a href="/solutions?q={{ q }}&letter={{ letter }}{% if project %}&project={{ project }}{% endif %}"
+               class="px-3 py-1.5 rounded-full text-xs font-semibold {{ 'bg-blue-600 text-white' if cat == '' else 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} transition-colors">Все сферы</a>
+            {% for slug, name in categories %}
+            <a href="/solutions?q={{ q }}&cat={{ slug }}&letter={{ letter }}{% if project %}&project={{ project }}{% endif %}"
+               class="px-3 py-1.5 rounded-full text-xs font-semibold {{ 'bg-blue-600 text-white' if cat == slug else 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} transition-colors">{{ name }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- Алфавит -->
+        <div class="flex flex-wrap gap-1 mb-8">
+            {% for L in alphabet %}
+            {% if L in available_letters %}
+            <a href="/solutions?q={{ q }}&cat={{ cat }}&letter={{ L }}{% if project %}&project={{ project }}{% endif %}"
+               class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold {{ 'bg-blue-600 text-white' if letter == L else 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} transition-colors">{{ L }}</a>
+            {% else %}
+            <span class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold text-gray-300">{{ L }}</span>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Карточки -->
+        {% if solutions %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            {% for s in solutions %}
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col hover:border-blue-300 hover:shadow-xl hover:shadow-blue-50 transition-all">
+                <span class="self-start text-[10px] font-semibold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-1 rounded-full mb-3">
+                    {{ category_names.get(s.category, s.category or 'Без категории') }}
+                </span>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">{{ s.position }}</h3>
+                <p class="text-sm text-gray-500 leading-relaxed mb-5 flex-1">{{ s.description or 'Описание будет добавлено.' }}</p>
+                <div class="flex items-center gap-2">
+                    {% if project %}
+                    <a href="/projects/{{ project }}/workers?solution={{ s.slug }}"
+                       class="flex-1 text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl transition-colors">Применить в проекте</a>
+                    {% elif current_user_email %}
+                    <a href="/projects"
+                       class="flex-1 text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl transition-colors">Использовать в проекте</a>
+                    {% else %}
+                    <a href="/login"
+                       class="flex-1 text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl transition-colors">Войти и использовать</a>
+                    {% endif %}
+                    <a href="/solutions/{{ s.slug }}{% if project %}?project={{ project }}{% endif %}"
+                       class="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors">Подробнее</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация -->
+        {% if total_pages > 1 %}
+        <div class="flex items-center justify-center gap-3">
+            {% if page > 1 %}
+            <a href="/solutions?q={{ q }}&cat={{ cat }}&letter={{ letter }}&page={{ page - 1 }}{% if project %}&project={{ project }}{% endif %}"
+               class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:border-gray-400 transition-colors">Назад</a>
+            {% endif %}
+            <span class="text-sm text-gray-500">Страница {{ page }} из {{ total_pages }}</span>
+            {% if page < total_pages %}
+            <a href="/solutions?q={{ q }}&cat={{ cat }}&letter={{ letter }}&page={{ page + 1 }}{% if project %}&project={{ project }}{% endif %}"
+               class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:border-gray-400 transition-colors">Вперёд</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="bg-white border border-gray-200 rounded-2xl p-12 text-center">
+            <p class="text-sm text-gray-500">По вашему запросу ничего не найдено. Попробуйте другой запрос, выберите сферу или полистайте алфавитный каталог.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

@@ -12,9 +12,29 @@ from fastapi import Request
 from fastapi.responses import RedirectResponse
 from app.shared.exceptions import RedirectException
 
+from app.database import AsyncSessionLocal, init_db
+
+
+async def promote_admin() -> None:
+    settings = get_settings()
+    if not settings.admin_email:
+        return
+    from sqlalchemy import update as sa_update
+    from app.modules.auth.models import User
+
+    async with AsyncSessionLocal() as session:
+        await session.execute(
+            sa_update(User)
+            .where(User.email == settings.admin_email)
+            .values(is_admin=True)
+        )
+        await session.commit()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    await promote_admin()
     yield
 
 
@@ -40,6 +60,8 @@ def create_app() -> FastAPI:
     from app.modules.projects.router import router as projects_router
     from app.modules.settings.router import router as settings_router
     from app.modules.templates.router import router as templates_router
+    from app.modules.admin.router import router as admin_router
+    from app.modules.solutions.router import router as solutions_router
 
     app.include_router(landing_router, tags=["landing"])
     app.include_router(auth_router, tags=["authentication"])
@@ -47,6 +69,8 @@ def create_app() -> FastAPI:
     app.include_router(projects_router, tags=["project"])
     app.include_router(settings_router, tags=["settings"])
     app.include_router(templates_router, tags=["templates"])
+    app.include_router(admin_router, tags=["admin"])
+    app.include_router(solutions_router, tags=["solutions"])
 
     return app
 

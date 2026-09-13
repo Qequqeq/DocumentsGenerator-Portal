@@ -34,6 +34,7 @@ async def account_page(
             "plan_labels": PLAN_LABELS,
             "msg": msg,
             "current_user_email": current_user.email,
+            "is_admin": bool(current_user.is_admin),
         },
     )
 

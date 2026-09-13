@@ -9,6 +9,9 @@ from app.modules.auth.models import User
 from app.modules.projects.dependencies import get_user_project, require_authenticated
 from app.modules.projects.models import Project
 from app.modules.projects.repositories import ProjectRepository
+from app.modules.solutions.categories import SOLUTION_CATEGORIES
+from app.modules.solutions.models import Solution
+from app.modules.solutions.service import SolutionService
 from app.shared.templating import templates
 from urllib.parse import quote
 
@@ -640,11 +643,20 @@ def _normalize_risks(risks_raw: dict) -> dict:
 @router.get("/projects/{project_id}/workers")
 async def workers_list(
     request: Request,
+    solution: str = "",
     current_user: User = Depends(require_authenticated),
     project: Project = Depends(get_user_project),
     db: AsyncSession = Depends(get_db),
 ):
     stats = await _worker_stats(project, db)
+    solutions_grouped = await SolutionService.list_published_grouped(db)
+
+    preselect = None
+    if solution:
+        preselect = await SolutionService.get_by_slug(db, solution)
+        if preselect is not None and not preselect.is_published:
+            preselect = None
+
     return templates.TemplateResponse(
         "workers_list.html",
         {
@@ -652,6 +664,10 @@ async def workers_list(
             "project": project,
             "workers": project.people_data or [],
             "stats": stats,
+            "solutions_grouped": solutions_grouped,
+            "categories": SOLUTION_CATEGORIES,
+            "solution_slug": preselect.slug if preselect else "",
+            "preselect_position": preselect.position if preselect else "",
             "error": request.query_params.get("error", ""),
             "msg": request.query_params.get("msg", ""),
             "saved": request.query_params.get("saved", "") == "1",
@@ -670,16 +686,25 @@ async def workers_apply_template(
     form = await request.form()
     indices_raw = form.getlist("worker_indices")
     tpl_file = form.get("template_file")
+    solution_id = (form.get("solution_id") or "").strip()
     people = list(project.people_data or [])
 
-    if not indices_raw or tpl_file is None or not getattr(tpl_file, "filename", ""):
+    if not indices_raw:
         return RedirectResponse(url=f"/projects/{project.id}/workers?error=apply_args", status_code=303)
-    try:
-        data = json.loads(await tpl_file.read())
-        risks_raw = data.get("risks")
-        if not isinstance(risks_raw, dict):
-            raise ValueError("missing risks")
-    except Exception:
+
+    risks_raw = None
+    if solution_id:
+        # Готовое решение: JSON читается на сервере, наружу не отдаётся
+        solution = await db.get(Solution, int(solution_id)) if solution_id.isdigit() else None
+        if solution is None or not solution.is_published:
+            return RedirectResponse(url=f"/projects/{project.id}/workers?error=apply_solution", status_code=303)
+        risks_raw = SolutionService.read_template(solution).get("risks")
+    elif tpl_file is not None and getattr(tpl_file, "filename", ""):
+        try:
+            risks_raw = json.loads(await tpl_file.read()).get("risks")
+        except Exception:
+            risks_raw = None
+    if not isinstance(risks_raw, dict):
         return RedirectResponse(url=f"/projects/{project.id}/workers?error=apply_json", status_code=303)
 
     inputs = _normalize_risks(risks_raw)
