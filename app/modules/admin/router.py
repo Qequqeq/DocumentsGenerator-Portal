@@ -12,6 +12,8 @@ from app.database import get_db
 from app.modules.admin.security import ADMIN_COOKIE
 from app.modules.auth.dependencies import require_admin, require_authenticated
 from app.modules.auth.models import User
+from app.modules.blog.models import Article
+from app.modules.blog.service import ArticleService, render_markdown
 from app.modules.solutions.categories import CATEGORY_NAMES, SOLUTION_CATEGORIES
 from app.modules.solutions.models import Solution
 from app.modules.solutions.service import SolutionService
@@ -236,3 +238,151 @@ async def admin_lock():
     response = RedirectResponse(url="/account", status_code=303)
     response.delete_cookie(ADMIN_COOKIE)
     return response
+
+
+def _article_form_context(request: Request, article=None, errors=None, values=None):
+    return {
+        "request": request,
+        "article": article,
+        "errors": errors or [],
+        "values": values or {},
+        "current_user_email": None,
+    }
+
+
+@router.get("/articles")
+async def admin_articles_list(
+    request: Request,
+    status: str = "",
+    q: str = "",
+    saved: str = "",
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    from sqlalchemy import func as sa_func
+
+    articles = await ArticleService.list_all(db, status=status, q=q)
+    total = (await db.execute(select(sa_func.count(Article.id)))).scalar() or 0
+    published = (
+        await db.execute(
+            select(sa_func.count(Article.id)).where(Article.is_published.is_(True))
+        )
+    ).scalar() or 0
+    return templates.TemplateResponse(
+        "admin_articles.html",
+        {
+            "request": request,
+            "articles": articles,
+            "status": status,
+            "q": q,
+            "saved": saved == "1",
+            "counts": {"all": total, "published": published, "draft": total - published},
+            "current_user_email": current_user.email,
+        },
+    )
+
+
+@router.get("/articles/new")
+async def admin_article_new(
+    request: Request,
+    current_user: User = Depends(require_admin),
+):
+    ctx = _article_form_context(request)
+    ctx["current_user_email"] = current_user.email
+    return templates.TemplateResponse("admin_article_form.html", ctx)
+
+
+@router.get("/articles/{article_id}/edit")
+async def admin_article_edit(
+    request: Request,
+    article_id: int,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    article = await db.get(Article, article_id)
+    if article is None:
+        return RedirectResponse(url="/admin/articles", status_code=303)
+    ctx = _article_form_context(request, article=article)
+    ctx["current_user_email"] = current_user.email
+    return templates.TemplateResponse("admin_article_form.html", ctx)
+
+
+@router.post("/articles/save")
+async def admin_article_save(
+    request: Request,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    form = await request.form()
+    article_id = (form.get("article_id") or "").strip()
+    title = (form.get("title") or "").strip()
+    annotation = (form.get("annotation") or "").strip()
+    content_md = form.get("content_md") or ""
+    is_published = form.get("is_published") == "on"
+
+    errors = []
+    if not title:
+        errors.append("Укажите заголовок статьи.")
+    if not content_md.strip():
+        errors.append("Текст статьи пуст.")
+
+    article = None
+    if article_id:
+        article = await db.get(Article, int(article_id))
+        if article is None:
+            errors.append("Статья не найдена.")
+
+    if errors:
+        ctx = _article_form_context(
+            request,
+            article=article,
+            errors=errors,
+            values={"title": title, "annotation": annotation, "content_md": content_md, "is_published": is_published},
+        )
+        ctx["current_user_email"] = current_user.email
+        return templates.TemplateResponse("admin_article_form.html", ctx, status_code=400)
+
+    if article is not None:
+        await ArticleService.update_article(
+            db, article,
+            title=title, annotation=annotation, content_md=content_md, is_published=is_published,
+        )
+    else:
+        await ArticleService.create_article(
+            db,
+            title=title, annotation=annotation, content_md=content_md, is_published=is_published,
+        )
+    return RedirectResponse(url="/admin/articles?saved=1", status_code=303)
+
+
+@router.post("/articles/preview")
+async def admin_article_preview(
+    request: Request,
+    current_user: User = Depends(require_admin),
+):
+    form = await request.form()
+    title = (form.get("title") or "").strip() or "Без заголовка"
+    annotation = (form.get("annotation") or "").strip()
+    content_md = form.get("content_md") or ""
+    return templates.TemplateResponse(
+        "admin_article_preview.html",
+        {
+            "request": request,
+            "title": title,
+            "annotation": annotation,
+            "content_html": render_markdown(content_md),
+            "current_user_email": current_user.email,
+        },
+    )
+
+
+@router.post("/articles/{article_id}/delete")
+async def admin_article_delete(
+    article_id: int,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    article = await db.get(Article, article_id)
+    if article is not None:
+        await ArticleService.delete_article(db, article)
+    return RedirectResponse(url="/admin/articles?saved=1", status_code=303)

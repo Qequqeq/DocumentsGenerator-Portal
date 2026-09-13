@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Блог{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+
+        <div class="mb-10">
+            <span class="inline-block text-xs font-semibold uppercase tracking-widest text-blue-600 mb-2">Блог</span>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Статьи и материалы</h1>
+            <p class="text-lg text-gray-500">Заметки об оценке профессиональных рисков, разбор требований и практические кейсы.</p>
+        </div>
+
+        {% if msg == 'not_found' %}
+        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Статья не найдена или не опубликована.</div>
+        {% endif %}
+
+        {% if articles %}
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for a in articles %}
+            <a href="/blog/{{ a.slug }}"
+               class="group block bg-white border border-gray-200 rounded-2xl p-6 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-50 transition-all">
+                <p class="text-xs text-gray-400 mb-3">{{ a.published_at.strftime('%d.%m.%Y') if a.published_at else a.created_at.strftime('%d.%m.%Y') }}</p>
+                <h2 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">{{ a.title }}</h2>
+                <p class="text-sm text-gray-500 leading-relaxed mb-4">{{ a.annotation }}</p>
+                <span class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600">
+                    Читать
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white border border-gray-200 rounded-2xl p-12 text-center">
+            <p class="text-sm text-gray-500">Статей пока нет — загляните позже.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

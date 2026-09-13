@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Редактирование статьи' if article else 'Новая статья' }}{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-3xl mx-auto px-6">
+
+        <a href="/admin/articles" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-4">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            К списку статей
+        </a>
+
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
+            {{ 'Редактирование: ' ~ article.title if article else 'Новая статья' }}
+        </h1>
+
+        {% for error in errors %}
+        <div class="mb-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{{ error }}</div>
+        {% endfor %}
+
+        <form method="post" action="/admin/articles/save" class="bg-white border border-gray-200 rounded-2xl p-6 space-y-5">
+            <input type="hidden" name="article_id" value="{{ article.id if article else '' }}">
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Заголовок <span class="text-red-500">*</span></label>
+                <input type="text" name="title" value="{{ values.get('title', article.title if article else '') }}" required
+                       class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                <p class="text-[11px] text-gray-400 mt-1">Slug для ссылки сформируется автоматически из заголовка.</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Аннотация (для карточки в списке)</label>
+                <textarea name="annotation" rows="3"
+                          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm leading-relaxed focus:outline-none focus:border-blue-500 resize-y">{{ values.get('annotation', article.annotation if article else '') }}</textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Текст статьи (Markdown) <span class="text-red-500">*</span></label>
+                <textarea name="content_md" rows="22"
+                          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-xs leading-relaxed font-mono focus:outline-none focus:border-blue-500 resize-y">{{ values.get('content_md', article.content_md if article else '') }}</textarea>
+                <details class="mt-2 text-[11px] text-gray-500">
+                    <summary class="cursor-pointer font-semibold text-gray-600">Подсказка по Markdown</summary>
+                    <div class="mt-2 space-y-1 font-mono bg-gray-50 border border-gray-100 rounded-lg p-3">
+                        <p># Заголовок 1 · ## Заголовок 2 · ### Заголовок 3</p>
+                        <p>**жирный** · *курсив* · [текст](https://ссылка)</p>
+                        <p>- пункт списка · 1. нумерованный пункт</p>
+                        <p>&gt; цитата · --- горизонтальная линия</p>
+                        <p>``` код в блоке ``` · | таблица | из | строк |</p>
+                    </div>
+                </details>
+            </div>
+
+            <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+                <input type="checkbox" name="is_published" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                       {% set pub = values.get('is_published', article.is_published if article else false) %}
+                       {% if pub %}checked{% endif %}>
+                Опубликовать в блоге
+            </label>
+
+            <div class="pt-2 flex flex-wrap items-center gap-4">
+                <button type="submit"
+                        class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg transition-colors">
+                    Сохранить
+                </button>
+                <button type="submit" formaction="/admin/articles/preview"
+                        class="inline-flex items-center justify-center text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:border-gray-400 hover:bg-gray-50 px-6 py-2.5 rounded-lg transition-colors">
+                    Предпросмотр
+                </button>
+                <a href="/admin/articles" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Отмена</a>
+            </div>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

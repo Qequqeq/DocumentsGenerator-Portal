@@ -62,6 +62,7 @@ def create_app() -> FastAPI:
     from app.modules.templates.router import router as templates_router
     from app.modules.admin.router import router as admin_router
     from app.modules.solutions.router import router as solutions_router
+    from app.modules.blog.router import router as blog_router
 
     app.include_router(landing_router, tags=["landing"])
     app.include_router(auth_router, tags=["authentication"])
@@ -71,6 +72,7 @@ def create_app() -> FastAPI:
     app.include_router(templates_router, tags=["templates"])
     app.include_router(admin_router, tags=["admin"])
     app.include_router(solutions_router, tags=["solutions"])
+    app.include_router(blog_router, tags=["blog"])
 
     return app
 

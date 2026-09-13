@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-3xl mx-auto px-6">
+
+        <a href="/blog" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mb-6">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            К списку статей
+        </a>
+
+        <p class="text-xs text-gray-400 mb-3">{{ article.published_at.strftime('%d.%m.%Y') if article.published_at else article.created_at.strftime('%d.%m.%Y') }}</p>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{{ article.title }}</h1>
+        {% if article.annotation %}
+        <p class="text-lg text-gray-500 leading-relaxed mb-8">{{ article.annotation }}</p>
+        {% endif %}
+
+        <article class="prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-img:rounded-xl">
+            {{ content_html | safe }}
+        </article>
+
+        <div class="mt-12 bg-blue-50 border border-blue-100 rounded-2xl p-6 text-center">
+            <p class="text-sm font-semibold text-gray-900 mb-2">Попробуйте АвтоРиск в деле</p>
+            <p class="text-xs text-gray-500 mb-4">Каталог готовых решений и веб-конструктор карт оценки рисков.</p>
+            <div class="flex justify-center gap-3">
+                <a href="/solutions" class="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-xl transition-colors">Готовые решения</a>
+                <a href="/#register" class="text-sm font-semibold text-blue-700 bg-white border border-blue-200 hover:border-blue-300 px-5 py-2.5 rounded-xl transition-colors">Начать бесплатно</a>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
