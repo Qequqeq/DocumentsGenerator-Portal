@@ -18,3 +18,6 @@ app.db
 .vscode/
 app/uploads/*
 !app/uploads/.gitkeep
+viz_router.py
+routes_graph.png
+routes_graph_tags.png
