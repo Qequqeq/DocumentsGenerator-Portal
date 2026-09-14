@@ -581,7 +581,7 @@ async def worker_risks_save(
             degree = form.get(f"degree_{dn}_{rn}")
             chance = form.get(f"chance_{dn}_{rn}")
             coeff = form.get(f"coeff_{dn}_{rn}")
-            if degree is None or chance is None or coeff is None:
+            if degree in (None, "") or chance in (None, "") or coeff in (None, ""):
                 errors.append(f"Заполните все множители для риска {rn}.")
                 continue
             rows[rn] = {
@@ -745,7 +745,7 @@ async def worker_save_as_template(
             degree = form.get(f"degree_{dn}_{rn}")
             chance = form.get(f"chance_{dn}_{rn}")
             coeff = form.get(f"coeff_{dn}_{rn}")
-            if degree is None or chance is None or coeff is None:
+            if degree in (None, "") or chance in (None, "") or coeff in (None, ""):
                 continue
             rows[rn] = {"deg": int(degree), "ch": int(chance), "kef": float(coeff)}
         if rows:
