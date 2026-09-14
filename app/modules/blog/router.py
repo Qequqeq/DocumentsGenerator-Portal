@@ -47,6 +47,7 @@ async def blog_article(
             "request": request,
             "article": article,
             "content_html": render_markdown(article.content_md),
+            "related": await ArticleService.related_articles(db, article.id),
             "current_user_email": current_user.email if current_user else None,
         },
     )

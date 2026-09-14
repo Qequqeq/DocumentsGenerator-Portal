@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.blog.models import Article
 from app.shared.text import safe_filename, translit
 from app.shared.timeutils import utcnow
+import random
 
 ALLOWED_TAGS = [
     "p", "h1", "h2", "h3", "h4", "h5", "h6",
@@ -129,6 +130,26 @@ class ArticleService:
         await db.flush()
         await db.refresh(article)
         return article
+
+    @staticmethod
+    async def related_articles(
+        db: AsyncSession,
+        exclude_id: int,
+        limit: int = 3,
+    ) -> List[Article]:
+        stmt = (
+            select(Article)
+            .where(
+                Article.is_published.is_(True),
+                Article.id != exclude_id,
+            )
+            .order_by(Article.published_at.desc())
+        )
+        result = await db.execute(stmt)
+        candidates = list(result.scalars().all())
+        if not candidates:
+            return []
+        return random.sample(candidates, min(limit, len(candidates)))
 
     @staticmethod
     async def delete_article(db: AsyncSession, article: Article) -> None:

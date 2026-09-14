@@ -21,6 +21,26 @@
             {{ content_html | safe }}
         </article>
 
+        {% if related %}
+        <div class="mt-14">
+            <h2 class="text-xl font-bold text-gray-900 mb-5">Читайте также</h2>
+            <div class="grid md:grid-cols-3 gap-5">
+                {% for r in related %}
+                <a href="/blog/{{ r.slug }}"
+                   class="group block bg-white border border-gray-200 rounded-2xl p-5 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-50 transition-all">
+                    <p class="text-xs text-gray-400 mb-2">{{ r.published_at.strftime('%d.%m.%Y') if r.published_at else r.created_at.strftime('%d.%m.%Y') }}</p>
+                    <h3 class="text-base font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">{{ r.title }}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed mb-3 line-clamp-3">{{ r.annotation }}</p>
+                    <span class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600">
+                        Читать
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <div class="mt-12 bg-blue-50 border border-blue-100 rounded-2xl p-6 text-center">
             <p class="text-sm font-semibold text-gray-900 mb-2">Попробуйте АвтоРиск в деле</p>
             <p class="text-xs text-gray-500 mb-4">Каталог готовых решений и веб-конструктор карт оценки рисков.</p>
