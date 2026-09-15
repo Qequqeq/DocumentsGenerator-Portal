@@ -6,13 +6,23 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
-from app.database import init_db
 
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 from app.shared.exceptions import RedirectException
 
 from app.database import AsyncSessionLocal, init_db
+import traceback
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from sqlalchemy import select
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from app.database import AsyncSessionLocal
+from app.modules.auth.models import User
+from app.modules.auth.service import SessionService
+from app.shared.templating import templates
 
 
 async def promote_admin() -> None:
@@ -37,6 +47,44 @@ async def lifespan(app: FastAPI):
     await promote_admin()
     yield
 
+async def _current_email_for_error_page(request: Request) -> str | None:
+    try:
+        user_id = SessionService.parse_session_cookie(request.cookies.get("session"))
+        if user_id is None:
+            return None
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(select(User.email).where(User.id == user_id))
+            return result.scalar_one_or_none()
+    except Exception:
+        return None
+
+
+def register_error_handlers(app: FastAPI) -> None:
+    @app.exception_handler(StarletteHTTPException)
+    async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+        if exc.status_code == 404:
+            return templates.TemplateResponse(
+                "404.html",
+                {
+                    "request": request,
+                    "current_user_email": await _current_email_for_error_page(request),
+                },
+                status_code=404,
+            )
+        return JSONResponse(status_code=exc.status_code, content={"detail": str(exc.detail)})
+
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(request: Request, exc: Exception):
+        traceback.print_exc()
+        return templates.TemplateResponse(
+            "500.html",
+            {
+                "request": request,
+                "current_user_email": await _current_email_for_error_page(request),
+            },
+            status_code=500,
+        )
+
 
 def create_app() -> FastAPI:
     settings = get_settings()
@@ -47,6 +95,7 @@ def create_app() -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
+
     @app.exception_handler(RedirectException)
     async def redirect_exception_handler(request: Request, exc: RedirectException):
         return RedirectResponse(url=exc.url, status_code=exc.status_code)
@@ -73,6 +122,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_router, tags=["admin"])
     app.include_router(solutions_router, tags=["solutions"])
     app.include_router(blog_router, tags=["blog"])
+    register_error_handlers(app)
 
     return app
 

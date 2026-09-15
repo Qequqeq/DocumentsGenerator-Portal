@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Страница не найдена{% endblock %}
+
+{% block content %}
+<section class="py-28">
+    <div class="max-w-xl mx-auto px-6 text-center">
+        <p class="text-7xl md:text-8xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6 select-none">404</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Страница не найдена</h1>
+        <p class="text-sm text-gray-500 leading-relaxed mb-8">
+            Похоже, такой страницы нет или она была перемещена. Проверьте адрес в строке браузера или вернитесь на главную.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-3">
+            <a href="/"
+               class="inline-flex items-center justify-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl transition-colors">
+                На главную
+            </a>
+            <a href="/solutions"
+               class="inline-flex items-center justify-center text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:border-gray-400 hover:bg-gray-50 px-6 py-3 rounded-xl transition-colors">
+                Каталог готовых решений
+            </a>
+            <a href="/blog"
+               class="inline-flex items-center justify-center text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:border-gray-400 hover:bg-gray-50 px-6 py-3 rounded-xl transition-colors">
+                Наш блог
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

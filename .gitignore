@@ -21,3 +21,5 @@ app/uploads/*
 viz_router.py
 routes_graph.png
 routes_graph_tags.png
+gen_schema.py
+schema.pdf
