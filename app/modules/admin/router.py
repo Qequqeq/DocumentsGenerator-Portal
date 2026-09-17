@@ -19,6 +19,11 @@ from app.modules.solutions.models import Solution
 from app.modules.solutions.service import SolutionService
 from app.shared.templating import templates
 from app.modules.admin.security import ADMIN_COOKIE, check_admin_password, is_admin_unlocked, make_admin_cookie
+from sqlalchemy import select
+
+from app.modules.auth.models import User
+from app.modules.subscriptions.models import PromoCode
+from app.modules.subscriptions.service import PromoCodeService
 
 router = APIRouter(prefix="/admin")
 
@@ -386,3 +391,153 @@ async def admin_article_delete(
     if article is not None:
         await ArticleService.delete_article(db, article)
     return RedirectResponse(url="/admin/articles?saved=1", status_code=303)
+
+
+@router.get("/promos")
+async def admin_promos_list(
+    request: Request,
+    saved: str = "",
+    error: str = "",
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    promos = await PromoCodeService.list_all(db)
+    return templates.TemplateResponse(
+        "admin_promos.html",
+        {
+            "request": request,
+            "promos": promos,
+            "saved": saved == "1",
+            "error": error,
+            "current_user_email": current_user.email,
+        },
+    )
+
+
+@router.post("/promos/save")
+async def admin_promo_save(
+    request: Request,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    form = await request.form()
+    promo_id = (form.get("promo_id") or "").strip()
+    code = (form.get("code") or "").strip().upper()
+    promo_type = (form.get("type") or "").strip()
+    value_raw = (form.get("value") or "").strip()
+    label = (form.get("label") or "").strip()
+    is_active = form.get("is_active") == "on"
+
+    if not code:
+        return RedirectResponse(url="/admin/promos?error=code", status_code=303)
+    if promo_type not in ("percent", "fixed"):
+        return RedirectResponse(url="/admin/promos?error=type", status_code=303)
+    try:
+        value = int(value_raw)
+        if value <= 0:
+            raise ValueError
+        if promo_type == "percent" and value > 100:
+            return RedirectResponse(url="/admin/promos?error=percent", status_code=303)
+    except ValueError:
+        return RedirectResponse(url="/admin/promos?error=value", status_code=303)
+
+    exclude_id = int(promo_id) if promo_id else None
+    if await PromoCodeService.code_exists(db, code, exclude_id):
+        return RedirectResponse(url="/admin/promos?error=exists", status_code=303)
+
+    if exclude_id:
+        promo = await db.get(PromoCode, exclude_id)
+        if promo is None:
+            return RedirectResponse(url="/admin/promos", status_code=303)
+        await PromoCodeService.update(
+            db, promo, code=code, type=promo_type, value=value, label=label, is_active=is_active
+        )
+    else:
+        await PromoCodeService.create(db, code=code, type=promo_type, value=value, label=label)
+
+    return RedirectResponse(url="/admin/promos?saved=1", status_code=303)
+
+
+@router.post("/promos/{promo_id}/delete")
+async def admin_promo_delete(
+    promo_id: int,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    promo = await db.get(PromoCode, promo_id)
+    if promo is not None:
+        await PromoCodeService.delete(db, promo)
+    return RedirectResponse(url="/admin/promos?saved=1", status_code=303)
+
+
+@router.get("/admins")
+async def admin_admins_list(
+    request: Request,
+    msg: str = "",
+    error: str = "",
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    users = list((await db.execute(select(User).order_by(User.created_at))).scalars().all())
+    return templates.TemplateResponse(
+        "admin_admins.html",
+        {
+            "request": request,
+            "users": users,
+            "current_user": current_user,
+            "msg": msg,
+            "error": error,
+            "current_user_email": current_user.email,
+        },
+    )
+
+
+@router.post("/admins/add")
+async def admin_admins_add(
+    request: Request,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    form = await request.form()
+    email = (form.get("email") or "").strip().lower()
+    if not email or "@" not in email:
+        return RedirectResponse(url="/admin/admins?error=empty", status_code=303)
+
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if user is None:
+        return RedirectResponse(url=f"/admin/admins?error=not_found&msg={quote(email)}", status_code=303)
+    if user.is_admin:
+        return RedirectResponse(url="/admin/admins?error=already", status_code=303)
+
+    user.is_admin = True
+    await db.flush()
+    return RedirectResponse(url="/admin/admins?msg=added", status_code=303)
+
+
+@router.post("/admins/{user_id}/grant")
+async def admin_admins_grant(
+    user_id: int,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await db.get(User, user_id)
+    if user is not None and not user.is_admin:
+        user.is_admin = True
+        await db.flush()
+    return RedirectResponse(url="/admin/admins?msg=added", status_code=303)
+
+
+@router.post("/admins/{user_id}/revoke")
+async def admin_admins_revoke(
+    user_id: int,
+    current_user: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    if user_id == current_user.id:
+        return RedirectResponse(url="/admin/admins?error=self", status_code=303)
+    user = await db.get(User, user_id)
+    if user is not None and user.is_admin:
+        user.is_admin = False
+        await db.flush()
+    return RedirectResponse(url="/admin/admins?msg=revoked", status_code=303)

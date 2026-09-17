@@ -11,7 +11,8 @@ from app.modules.subscriptions.dependencies import get_optional_subscription
 from app.modules.subscriptions.models import Subscription, PLAN_LABELS
 from app.modules.subscriptions.service import SubscriptionService
 from app.shared.templating import templates
-from app.modules.subscriptions.pricing import SUBSCRIPTION_PRICES, get_promo, price_with_promo
+from app.modules.subscriptions.pricing import SUBSCRIPTION_PRICES, price_with_promo
+from app.modules.subscriptions.service import PromoCodeService
 
 router = APIRouter()
 
@@ -45,8 +46,9 @@ async def subscribe_page(
     promo: str = "",
     current_user: User = Depends(require_authenticated),
     subscription: Subscription | None = Depends(get_optional_subscription),
+    db: AsyncSession = Depends(get_db)
 ):
-    promo_data = get_promo(promo)
+    promo_data = await PromoCodeService.get_active_by_code(db, promo)
     prices = {}
     for plan, base in SUBSCRIPTION_PRICES.items():
         final, discount = price_with_promo(base, promo_data)
@@ -77,7 +79,9 @@ async def subscribe_create(
     if plan not in PLAN_LABELS:
         return RedirectResponse(url="/subscribe", status_code=303)
 
-    promo_data = get_promo(promo)
+    promo_data = await PromoCodeService.get_active_by_code(db, promo)
+    if promo.strip() and promo_data is None:
+        return RedirectResponse(url=f"/subscribe?promo={quote(promo.strip().upper())}", status_code=303)
     if promo.strip() and promo_data is None:
         return RedirectResponse(url=f"/subscribe?promo={quote(promo.strip().upper())}", status_code=303)
 

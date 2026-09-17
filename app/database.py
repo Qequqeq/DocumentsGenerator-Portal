@@ -48,7 +48,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 async def init_db() -> None:
     from app.shared.models import Base  # noqa: F401
     from app.modules.auth.models import User  # noqa: F401
-    from app.modules.subscriptions.models import Subscription  # noqa: F401
+    from app.modules.subscriptions.models import Subscription, PromoCode  # noqa: F401
     from app.modules.projects.models import Project  # noqa: F401
     from app.modules.settings.models import UserCustomization  # noqa: F401
     from app.modules.templates.models import CustomTemplate  # noqa: F401

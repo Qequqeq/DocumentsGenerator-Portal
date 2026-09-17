@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.models import Base, TimestampMixin
@@ -45,3 +45,14 @@ PLAN_LABELS = {
     "monthly": "Продвинутый: 5 000 руб./месяц",
     "yearly": "Продвинутый: 50 000 руб./год",
 }
+
+class PromoCode(TimestampMixin, Base):
+
+    __tablename__ = "promo_codes"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    type: Mapped[str] = mapped_column(String(10), nullable=False)  # percent | fixed
+    value: Mapped[int] = mapped_column(Integer, nullable=False)
+    label: Mapped[str] = mapped_column(String(255), default="", nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

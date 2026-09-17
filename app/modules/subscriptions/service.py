@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.subscriptions.models import Subscription
+from app.modules.subscriptions.models import Subscription, PromoCode
 from app.shared.timeutils import utcnow
 
 
@@ -95,3 +95,68 @@ class SubscriptionService:
         subscription.status = "cancelled"
         await db.commit()
         return True
+
+class PromoCodeService:
+
+    @staticmethod
+    async def get_active_by_code(db: AsyncSession, code: str):
+        if not code:
+            return None
+        result = await db.execute(
+            select(PromoCode).where(
+                PromoCode.code == code.strip().upper(),
+                PromoCode.is_active.is_(True),
+            )
+        )
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def list_all(db: AsyncSession):
+        result = await db.execute(select(PromoCode).order_by(PromoCode.created_at.desc()))
+        return list(result.scalars().all())
+
+    @staticmethod
+    async def code_exists(db: AsyncSession, code: str, exclude_id=None) -> bool:
+        stmt = select(PromoCode.id).where(PromoCode.code == code)
+        if exclude_id is not None:
+            stmt = stmt.where(PromoCode.id != exclude_id)
+        return (await db.execute(stmt)).scalar_one_or_none() is not None
+
+    @staticmethod
+    async def create(db: AsyncSession, *, code: str, type: str, value: int, label: str) -> PromoCode:
+        promo = PromoCode(
+            code=code.strip().upper(),
+            type=type,
+            value=value,
+            label=label.strip(),
+            is_active=True,
+        )
+        db.add(promo)
+        await db.flush()
+        await db.refresh(promo)
+        return promo
+
+    @staticmethod
+    async def update(
+        db: AsyncSession,
+        promo: PromoCode,
+        *,
+        code: str,
+        type: str,
+        value: int,
+        label: str,
+        is_active: bool,
+    ) -> PromoCode:
+        promo.code = code.strip().upper()
+        promo.type = type
+        promo.value = value
+        promo.label = label.strip()
+        promo.is_active = is_active
+        await db.flush()
+        await db.refresh(promo)
+        return promo
+
+    @staticmethod
+    async def delete(db: AsyncSession, promo: PromoCode) -> None:
+        await db.delete(promo)
+        await db.flush()

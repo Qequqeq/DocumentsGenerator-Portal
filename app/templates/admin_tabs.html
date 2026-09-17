@@ -1,0 +1,7 @@
+{% set path = request.url.path %}
+<div class="flex flex-wrap gap-2 mb-6">
+    <a href="/admin/solutions" class="px-4 py-2 rounded-xl text-sm font-semibold {{ 'bg-slate-800 text-white' if '/admin/solutions' in path else 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} transition-colors">Готовые решения</a>
+    <a href="/admin/articles" class="px-4 py-2 rounded-xl text-sm font-semibold {{ 'bg-slate-800 text-white' if '/admin/articles' in path else 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} transition-colors">Статьи блога</a>
+    <a href="/admin/promos" class="px-4 py-2 rounded-xl text-sm font-semibold {{ 'bg-slate-800 text-white' if '/admin/promos' in path else 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} transition-colors">Промокоды</a>
+    <a href="/admin/admins" class="px-4 py-2 rounded-xl text-sm font-semibold {{ 'bg-slate-800 text-white' if '/admin/admins' in path else 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} transition-colors">Админы</a>
+</div>
