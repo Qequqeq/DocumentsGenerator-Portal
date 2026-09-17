@@ -22,6 +22,7 @@ def get_engine() -> AsyncEngine:
         echo=settings.is_dev,
         connect_args=connect_args,
         future=True,
+        pool_pre_ping=True,
     )
 
 
@@ -45,14 +46,14 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 
-async def init_db() -> None:
-    from app.shared.models import Base  # noqa: F401
-    from app.modules.auth.models import User  # noqa: F401
-    from app.modules.subscriptions.models import Subscription, PromoCode  # noqa: F401
-    from app.modules.projects.models import Project  # noqa: F401
-    from app.modules.settings.models import UserCustomization  # noqa: F401
-    from app.modules.templates.models import CustomTemplate  # noqa: F401
-    from app.modules.solutions.models import Solution  # noqa: F401
+#async def init_db() -> None:
+#    from app.shared.models import Base  # noqa: F401
+#    from app.modules.auth.models import User  # noqa: F401
+#    from app.modules.subscriptions.models import Subscription, PromoCode  # noqa: F401
+#    from app.modules.projects.models import Project  # noqa: F401
+#    from app.modules.settings.models import UserCustomization  # noqa: F401
+#    from app.modules.templates.models import CustomTemplate  # noqa: F401
+#    from app.modules.solutions.models import Solution  # noqa: F401
 
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+#    async with engine.begin() as conn:
+#        await conn.run_sync(Base.metadata.create_all)

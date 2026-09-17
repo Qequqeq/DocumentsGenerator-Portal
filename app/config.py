@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    database_url: str = "sqlite+aiosqlite:///./app.db"
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/autorisk_dev"
     secret_key: str = "not-real-key"
     session_max_age_days: int = 7
     environment: str = "development"

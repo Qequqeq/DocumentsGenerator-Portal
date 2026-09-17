@@ -10,8 +10,6 @@ from app.config import get_settings
 from fastapi import Request
 from fastapi.responses import RedirectResponse
 from app.shared.exceptions import RedirectException
-
-from app.database import AsyncSessionLocal, init_db
 import traceback
 
 from fastapi import Request
@@ -43,7 +41,7 @@ async def promote_admin() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
+    #await init_db()
     await promote_admin()
     yield
 
