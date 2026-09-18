@@ -16,6 +16,7 @@ from app.modules.projects.models import *  # noqa
 from app.modules.settings.models import *  # noqa
 from app.modules.templates.models import *  # noqa
 from app.modules.solutions.models import *  # noqa
+from app.modules.blog.models import *
 
 config = context.config
 
