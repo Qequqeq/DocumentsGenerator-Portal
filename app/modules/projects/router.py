@@ -40,6 +40,7 @@ from app.modules.subscriptions.dependencies import get_optional_subscription
 from app.modules.subscriptions.models import Subscription
 from app.modules.projects.generation import generate_project_documents
 from app.modules.subscriptions.pricing import calc_report_price
+from app.shared.flash import redirect_with_flash
 
 
 router = APIRouter()
@@ -178,7 +179,7 @@ async def project_org_save(
     org = {key: (form.get(key) or "").strip() for key in ORG_SCALAR_FIELDS}
 
     if not org["full_name"]:
-        return RedirectResponse(url=f"/projects/{project.id}?error=org_name", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}", "Укажите полное наименование организации.", level="error")
 
     poses = [v.strip() for v in form.getlist("chairmen_poses") if v.strip()]
     names = [v.strip() for v in form.getlist("chairmen_names") if v.strip()]
@@ -189,9 +190,10 @@ async def project_org_save(
     if doc_date:
         is_valid, date_error = validate_date(doc_date)
         if not is_valid:
-            return RedirectResponse(
-                url=f"/projects/{project.id}?error=date&msg={quote(date_error or '')}",
-                status_code=303,
+            return redirect_with_flash(
+                f"/projects/{project.id}",
+                date_error or "Неверный формат даты.",
+                level="error",
             )
         project.doc_date = doc_date
 
@@ -199,7 +201,7 @@ async def project_org_save(
     project.org_name = org["full_name"]
     await ProjectRepository.update(db, project)
 
-    return RedirectResponse(url=f"/projects/{project.id}?saved=1&open=manual", status_code=303)
+    return redirect_with_flash(f"/projects/{project.id}?open=manual", "Данные организации сохранены.", level="success")
 
 
 @router.post("/projects/{project_id}/delete")
@@ -690,14 +692,14 @@ async def workers_apply_template(
     people = list(project.people_data or [])
 
     if not indices_raw:
-        return RedirectResponse(url=f"/projects/{project.id}/workers?error=apply_args", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}/workers", "Выберите сотрудников для применения шаблона.", level="error")
 
     risks_raw = None
     if solution_id:
         # Готовое решение: JSON читается на сервере, наружу не отдаётся
         solution = await db.get(Solution, int(solution_id)) if solution_id.isdigit() else None
         if solution is None or not solution.is_published:
-            return RedirectResponse(url=f"/projects/{project.id}/workers?error=apply_solution", status_code=303)
+            return redirect_with_flash(f"/projects/{project.id}/workers", "Не удалось применить шаблон решения.", level="error")
         risks_raw = SolutionService.read_template(solution).get("risks")
     elif tpl_file is not None and getattr(tpl_file, "filename", ""):
         try:
@@ -705,7 +707,7 @@ async def workers_apply_template(
         except Exception:
             risks_raw = None
     if not isinstance(risks_raw, dict):
-        return RedirectResponse(url=f"/projects/{project.id}/workers?error=apply_json", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}/workers", "Неверный JSON шаблона или шаблон не подходит для этого проекта.", level="error")
 
     inputs = _normalize_risks(risks_raw)
     risk_inputs = dict(project.risk_inputs or {})
@@ -720,7 +722,7 @@ async def workers_apply_template(
     if project.status == "draft":
         project.status = "in_progress"
     await ProjectRepository.update(db, project)
-    return RedirectResponse(url=f"/projects/{project.id}/workers?saved=1", status_code=303)
+    return redirect_with_flash(f"/projects/{project.id}/workers", "Шаблон применён к выбранным сотрудникам.", level="success")
 
 
 @router.post("/projects/{project_id}/workers/{idx}/save-as-template")
@@ -774,28 +776,29 @@ async def project_generate(
 ):
     people = project.people_data or []
     if not people:
-        return RedirectResponse(url=f"/projects/{project.id}/people?error=no_workers", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}/people", "Нет сотрудников в проекте.", level="error")
     stats = await _worker_stats(project, db)
     unfilled = [w["position"] for w in people if not stats.get(str(w["ID"]), {}).get("filled")]
     if unfilled:
-        return RedirectResponse(
-            url=f"/projects/{project.id}/workers?error=unfilled&msg={quote(', '.join(unfilled))}",
-            status_code=303,
+        return redirect_with_flash(
+            f"/projects/{project.id}/workers",
+            f"Невозможно сформировать отчёт. Не заполнены карты: {', '.join(unfilled)}.",
+            level="error",
         )
 
     ok, error_code, count = await generate_project_documents(
         project, db, current_user.id, subscription is not None
     )
     if not ok:
-        return RedirectResponse(url=f"/projects/{project.id}/results?msg={error_code}", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}/results", error_code or "Не удалось сформировать документы.", level="error")
 
     project.status = "completed"
     project.generated_count = count
     await ProjectRepository.update(db, project)
 
     if subscription is not None:
-        return RedirectResponse(url=f"/projects/{project.id}/results", status_code=303)
-    return RedirectResponse(url=f"/projects/{project.id}/checkout", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}/results", "Документы подготовлены.", level="success")
+    return redirect_with_flash(f"/projects/{project.id}/checkout", "Документы подготовлены. Для скачивания перейдите к оплате.", level="info")
 
 
 @router.get("/projects/{project_id}/download-archive")
@@ -810,7 +813,7 @@ async def project_download_archive(
     project_dir = ProjectRepository.get_project_dir(current_user.id, project.id)
     zip_path = project_dir / "cards_archive.zip"
     if not zip_path.exists():
-        return RedirectResponse(url=f"/projects/{project.id}/results?msg=gen_pending", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}/results", "Генерация документов ещё идёт. Попробуйте позже.", level="info")
     org_name = safe_filename(translit((project.org_data or {}).get("full_name", "") or "project"))
     return FileResponse(
         path=zip_path,
@@ -826,7 +829,7 @@ async def project_checkout(
     subscription: Subscription | None = Depends(get_optional_subscription),
 ):
     if subscription is not None or project.status == "paid":
-        return RedirectResponse(url=f"/projects/{project.id}/results", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}/results", "Архив уже доступен для скачивания.", level="info")
 
     return templates.TemplateResponse(
         "checkout.html",
@@ -850,12 +853,11 @@ async def project_pay(
     Следующим шагом здесь будет создание платежа в ЮKassa,
     а статус 'paid' будет выставляться вебхуком после реальной оплаты."""
     if subscription is not None:
-        return RedirectResponse(url=f"/projects/{project.id}/results", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}/results", "Подписка уже активна — архив доступен без оплаты.", level="info")
 
     project.status = "paid"
     await ProjectRepository.update(db, project)
-    return RedirectResponse(url=f"/projects/{project.id}/results?msg=paid", status_code=303)
-
+    return redirect_with_flash(f"/projects/{project.id}/results", "Оплата принята. Архив доступен для скачивания.", level="success")
 
 @router.get("/projects/{project_id}/results")
 async def project_results(
@@ -921,7 +923,7 @@ async def project_save_zip(
             zf.writestr(filename, json.dumps(template_data, ensure_ascii=False, indent=2))
             written += 1
     if written == 0:
-        return RedirectResponse(url=f"/projects/{project.id}/results?msg=no_filled", status_code=303)
+        return redirect_with_flash(f"/projects/{project.id}/results", "Нет заполненных данных для сохранения проекта.", level="error")
 
     org_name = safe_filename(translit((project.org_data or {}).get("full_name", "") or "project"))
     buffer.seek(0)

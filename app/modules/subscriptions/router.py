@@ -2,7 +2,6 @@
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Form, Request
-from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.modules.auth.dependencies import get_current_user, get_current_user_id, require_authenticated
@@ -13,6 +12,7 @@ from app.modules.subscriptions.service import SubscriptionService
 from app.shared.templating import templates
 from app.modules.subscriptions.pricing import SUBSCRIPTION_PRICES, price_with_promo
 from app.modules.subscriptions.service import PromoCodeService
+from app.shared.flash import redirect_with_flash
 
 router = APIRouter()
 
@@ -77,13 +77,11 @@ async def subscribe_create(
     db: AsyncSession = Depends(get_db),
 ):
     if plan not in PLAN_LABELS:
-        return RedirectResponse(url="/subscribe", status_code=303)
+        return redirect_with_flash("/subscribe", "Неверный тариф подписки.", level="error")
 
     promo_data = await PromoCodeService.get_active_by_code(db, promo)
     if promo.strip() and promo_data is None:
-        return RedirectResponse(url=f"/subscribe?promo={quote(promo.strip().upper())}", status_code=303)
-    if promo.strip() and promo_data is None:
-        return RedirectResponse(url=f"/subscribe?promo={quote(promo.strip().upper())}", status_code=303)
+        return redirect_with_flash("/subscribe", "Промокод не найден или недействителен.", level="error")
 
     final_price, _ = price_with_promo(SUBSCRIPTION_PRICES[plan], promo_data)
     await SubscriptionService.create_subscription(
@@ -93,7 +91,7 @@ async def subscribe_create(
         promo_code=promo.strip().upper() if promo_data else None,
         price=final_price,
     )
-    return RedirectResponse(url="/account?msg=sub_activated", status_code=303)
+    return redirect_with_flash("/account", "Подписка активирована.", level="success")
 
 @router.post("/cancel-subscription")
 async def cancel_subscription(
@@ -103,7 +101,7 @@ async def cancel_subscription(
 ):
     user_id = await get_current_user_id(request)
     if user_id is None:
-        return RedirectResponse(url="/#register", status_code=303)
+        return redirect_with_flash("/#register", "Сначала войдите в аккаунт.", level="error")
 
     await SubscriptionService.cancel_subscription(db, user_id, subscription_id)
-    return RedirectResponse(url="/account", status_code=303)
+    return redirect_with_flash("/account", "Подписка отменена.", level="info")

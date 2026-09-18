@@ -8,6 +8,7 @@ from app.modules.auth.dependencies import get_current_user
 from app.modules.auth.models import User
 from app.modules.blog.service import ArticleService, render_markdown
 from app.shared.templating import templates
+from app.shared.flash import redirect_with_flash
 
 router = APIRouter()
 
@@ -40,7 +41,7 @@ async def blog_article(
 ):
     article = await ArticleService.get_by_slug(db, slug)
     if article is None or not article.is_published:
-        return RedirectResponse(url="/blog?msg=not_found", status_code=303)
+        return redirect_with_flash("/blog", "Статья не найдена.", level="error")
     return templates.TemplateResponse(
         "blog_article.html",
         {

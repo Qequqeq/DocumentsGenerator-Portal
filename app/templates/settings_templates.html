@@ -14,12 +14,7 @@
             <p class="text-sm text-gray-500">По умолчанию используются шаблоны сервиса. С подпиской можно загрузить свои шаблоны карты и отчёта — они будут применяться при генерации вместо стандартных.</p>
         </div>
 
-        {% if saved %}
-        <div class="mb-6 text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">Сохранено.</div>
-        {% endif %}
-        {% if error %}
-        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{{ error }}</div>
-        {% endif %}
+        {# Notifications handled via unified toast system (#flash cookie + client) #}
 
         <div class="grid md:grid-cols-2 gap-6">
 

@@ -10,6 +10,7 @@ from app.modules.solutions.categories import CATEGORY_NAMES, SOLUTION_CATEGORIES
 from app.modules.solutions.service import SolutionService
 from app.shared.templating import templates
 from fastapi.responses import FileResponse, RedirectResponse
+from app.shared.flash import redirect_with_flash
 
 
 router = APIRouter()
@@ -66,7 +67,7 @@ async def solution_detail(
 ):
     solution = await SolutionService.get_by_slug(db, slug)
     if solution is None or not solution.is_published:
-        return RedirectResponse(url="/solutions?msg=not_found", status_code=303)
+        return redirect_with_flash("/solutions", "Решение не найдено.", level="error")
 
     return templates.TemplateResponse(
         "solution_detail.html",

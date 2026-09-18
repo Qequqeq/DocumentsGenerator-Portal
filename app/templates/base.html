@@ -397,5 +397,53 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 })();
 </script>
+<!-- Toast container and helper (reads short-lived cookie `flash`) -->
+<div id="toast-container" class="fixed top-6 right-6 z-50 space-y-2 pointer-events-none"></div>
+<script>
+function _createToastEl(type, text) {
+    const colors = {
+        success: ['bg-green-50','border-green-100','text-green-700'],
+        error:   ['bg-red-50','border-red-100','text-red-600'],
+        warn:    ['bg-amber-50','border-amber-100','text-amber-700'],
+        info:    ['bg-blue-50','border-blue-100','text-blue-700'],
+    };
+    const c = colors[type] || colors.info;
+    const el = document.createElement('div');
+    el.className = `max-w-sm pointer-events-auto p-3 border rounded-lg shadow-sm text-sm ${c[0]} ${c[1]} ${c[2]}`;
+    el.innerText = text;
+    return el;
+}
+
+function showToast(type, text, timeout = 5000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const el = _createToastEl(type, text);
+    container.appendChild(el);
+    el.style.opacity = 0;
+    el.style.transform = 'translateY(-6px)';
+    requestAnimationFrame(() => { el.style.transition = 'all .25s'; el.style.opacity = 1; el.style.transform = 'translateY(0)'; });
+    setTimeout(() => {
+        el.style.opacity = 0; el.style.transform = 'translateY(-6px)';
+        setTimeout(()=> el.remove(), 300);
+    }, timeout);
+}
+
+// Read flash cookie set by server, show toast, then clear it
+(function () {
+    function readCookie(name) {
+        const m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+        return m ? decodeURIComponent(m[1]) : null;
+    }
+    const flash = readCookie('flash');
+    if (flash) {
+        try {
+            const obj = JSON.parse(flash);
+            if (obj && obj.text) showToast(obj.level || 'info', obj.text);
+        } catch (e) { console.error(e); }
+        // clear cookie
+        document.cookie = 'flash=; path=/; max-age=0';
+    }
+})();
+</script>
 </body>
 </html>

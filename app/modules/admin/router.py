@@ -24,6 +24,7 @@ from sqlalchemy import select
 from app.modules.auth.models import User
 from app.modules.subscriptions.models import PromoCode
 from app.modules.subscriptions.service import PromoCodeService
+from app.shared.flash import redirect_with_flash
 
 router = APIRouter(prefix="/admin")
 
@@ -224,7 +225,7 @@ async def admin_unlock(
     if not getattr(current_user, "is_admin", False):
         return RedirectResponse(url="/account", status_code=303)
     if not check_admin_password(password):
-        return RedirectResponse(url="/admin/unlock?error=invalid", status_code=303)
+        return redirect_with_flash("/admin/unlock", "Неверный пароль администратора.", level="error")
 
     value, max_age = make_admin_cookie()
     response = RedirectResponse(url="/admin/solutions", status_code=303)
@@ -429,21 +430,21 @@ async def admin_promo_save(
     is_active = form.get("is_active") == "on"
 
     if not code:
-        return RedirectResponse(url="/admin/promos?error=code", status_code=303)
+        return redirect_with_flash("/admin/promos", "Код купона обязателен.", level="error")
     if promo_type not in ("percent", "fixed"):
-        return RedirectResponse(url="/admin/promos?error=type", status_code=303)
+        return redirect_with_flash("/admin/promos", "Неверный тип промокода.", level="error")
     try:
         value = int(value_raw)
         if value <= 0:
             raise ValueError
         if promo_type == "percent" and value > 100:
-            return RedirectResponse(url="/admin/promos?error=percent", status_code=303)
+            return redirect_with_flash("/admin/promos", "Процентное значение не может быть больше 100.", level="error")
     except ValueError:
-        return RedirectResponse(url="/admin/promos?error=value", status_code=303)
+        return redirect_with_flash("/admin/promos", "Неверное значение промокода.", level="error")
 
     exclude_id = int(promo_id) if promo_id else None
     if await PromoCodeService.code_exists(db, code, exclude_id):
-        return RedirectResponse(url="/admin/promos?error=exists", status_code=303)
+        return redirect_with_flash("/admin/promos", "Промокод с таким кодом уже существует.", level="error")
 
     if exclude_id:
         promo = await db.get(PromoCode, exclude_id)
@@ -501,18 +502,18 @@ async def admin_admins_add(
     form = await request.form()
     email = (form.get("email") or "").strip().lower()
     if not email or "@" not in email:
-        return RedirectResponse(url="/admin/admins?error=empty", status_code=303)
+        return redirect_with_flash("/admin/admins", "Укажите корректный email.", level="error")
 
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
     if user is None:
-        return RedirectResponse(url=f"/admin/admins?error=not_found&msg={quote(email)}", status_code=303)
+        return redirect_with_flash("/admin/admins", f"Пользователь с почтой «{email}» не найден — он должен сначала зарегистрироваться.", level="error")
     if user.is_admin:
-        return RedirectResponse(url="/admin/admins?error=already", status_code=303)
+        return redirect_with_flash("/admin/admins", "Пользователь уже является администратором.", level="info")
 
     user.is_admin = True
     await db.flush()
-    return RedirectResponse(url="/admin/admins?msg=added", status_code=303)
+    return redirect_with_flash("/admin/admins", "Права администратора выданы.", level="success")
 
 
 @router.post("/admins/{user_id}/grant")
@@ -525,7 +526,7 @@ async def admin_admins_grant(
     if user is not None and not user.is_admin:
         user.is_admin = True
         await db.flush()
-    return RedirectResponse(url="/admin/admins?msg=added", status_code=303)
+    return redirect_with_flash("/admin/admins", "Права администратора выданы.", level="success")
 
 
 @router.post("/admins/{user_id}/revoke")
@@ -535,9 +536,9 @@ async def admin_admins_revoke(
     db: AsyncSession = Depends(get_db),
 ):
     if user_id == current_user.id:
-        return RedirectResponse(url="/admin/admins?error=self", status_code=303)
+        return redirect_with_flash("/admin/admins", "Нельзя отзывать собственные права администратора.", level="error")
     user = await db.get(User, user_id)
     if user is not None and user.is_admin:
         user.is_admin = False
         await db.flush()
-    return RedirectResponse(url="/admin/admins?msg=revoked", status_code=303)
+    return redirect_with_flash("/admin/admins", "Права администратора отозваны.", level="success")

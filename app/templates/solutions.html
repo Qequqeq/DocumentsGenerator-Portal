@@ -29,9 +29,7 @@
             {% if q or cat or letter %}
             <a href="/solutions{% if project %}?project={{ project }}{% endif %}" class="text-sm text-gray-500 hover:text-gray-900 self-center transition-colors">Сбросить</a>
             {% endif %}
-            {% if msg == 'not_found' %}
-            <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Решение не найдено или не опубликовано.</div>
-            {% endif %}
+            {# Notifications handled via unified toast system (#flash cookie + client) #}
         </form>
 
         <!-- Категории -->

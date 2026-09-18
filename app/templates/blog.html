@@ -12,9 +12,7 @@
             <p class="text-lg text-gray-500">Заметки об оценке профессиональных рисков, разбор требований и практические кейсы.</p>
         </div>
 
-        {% if msg == 'not_found' %}
-        <div class="mb-6 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">Статья не найдена или не опубликована.</div>
-        {% endif %}
+        {# Notifications handled via unified toast system (#flash cookie + client) #}
 
         {% if articles %}
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

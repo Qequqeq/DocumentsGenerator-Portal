@@ -10,6 +10,7 @@ from app.modules.settings.risk_catalog import DANGER_DATABASE
 from app.modules.settings.service import CustomizationService
 from app.modules.subscriptions.dependencies import get_optional_subscription, require_subscription
 from app.modules.subscriptions.models import Subscription
+from app.shared.flash import redirect_with_flash
 from app.shared.templating import templates
 
 router = APIRouter()
@@ -83,7 +84,7 @@ async def settings_descriptions_save(
         if values:
             await CustomizationService.save_section(db, current_user.id, section, values)
 
-    return RedirectResponse(url="/settings/descriptions?saved=1", status_code=303)
+    return redirect_with_flash("/settings/descriptions", "Настройки описаний сохранены.", level="success")
 
 
 @router.post("/settings/reset-descriptions")
@@ -94,7 +95,7 @@ async def settings_reset_descriptions(
 ):
     for section in ("DEGREE_INFO", "CHANCE_INFO", "COEFF_INFO", "CONTROL_INFO"):
         await CustomizationService.reset_section(db, current_user.id, section)
-    return RedirectResponse(url="/settings/descriptions", status_code=303)
+    return redirect_with_flash("/settings/descriptions", "Настройки описаний сброшены.", level="info")
 
 @router.get("/settings/ranges")
 async def settings_ranges(
@@ -144,17 +145,17 @@ async def settings_ranges_save(
         summary = {float(s_thr[i].replace(",", ".")): s_lvl.get(i, "") for i in s_thr}
         aplication = {float(a_thr[i].replace(",", ".")): a_lvl.get(i, "") for i in a_thr}
     except (ValueError, KeyError):
-        return RedirectResponse(url="/settings/ranges?error=invalid_number", status_code=303)
+        return redirect_with_flash("/settings/ranges", "Ошибка: все пороги должны быть числами.", level="error")
 
     for d in (summary, aplication):
         keys = sorted(d.keys())
         for i in range(len(keys) - 1):
             if keys[i] >= keys[i + 1]:
-                return RedirectResponse(url="/settings/ranges?error=order", status_code=303)
+                return redirect_with_flash("/settings/ranges", "Ошибка: пороги должны идти строго по возрастанию: E, D, C, B, A.", level="error")
 
     await CustomizationService.save_section(db, current_user.id, "SUMMARY_INFO", summary)
     await CustomizationService.save_section(db, current_user.id, "SUMMARY_INFO_APLICATION", aplication)
-    return RedirectResponse(url="/settings/ranges?saved=1", status_code=303)
+    return redirect_with_flash("/settings/ranges", "Настройки диапазонов сохранены.", level="success")
 
 
 @router.post("/settings/reset-ranges")
@@ -165,7 +166,7 @@ async def settings_reset_ranges(
 ):
     for section in ("SUMMARY_INFO", "SUMMARY_INFO_APLICATION"):
         await CustomizationService.reset_section(db, current_user.id, section)
-    return RedirectResponse(url="/settings/ranges", status_code=303)
+    return redirect_with_flash("/settings/ranges", "Диапазоны сброшены к значениям по умолчанию.", level="info")
 
 @router.get("/settings/risks")
 async def settings_risks(
@@ -178,23 +179,12 @@ async def settings_risks(
     measures = await CustomizationService.get_measures(db, current_user.id)
     dangers = []
     for danger in DANGER_DATABASE.values():
-        risks = []
-        for risk in danger.risks:
-            risk_measures = measures.get(risk.risk_number, [])
-            risks.append({
-                "risk_number": risk.risk_number,
-                "risk_name": risk.risk_name,
-                "measures_text": "\n".join(risk_measures),
-            })
-        dangers.append({
-            "danger_number": danger.danger_number,
-            "danger_name": danger.danger_name,
-            "risks": risks,
-        })
+        dangers.append(danger)
     return templates.TemplateResponse(
         "settings_risks.html",
         {
             "request": request,
+            "measures": measures,
             "dangers": dangers,
             "saved": saved == "1",
             "current_user_email": current_user.email,
@@ -210,22 +200,9 @@ async def settings_risks_save(
     db: AsyncSession = Depends(get_db),
 ):
     form = await request.form()
-    measures_data = {}
+    values = {}
     for key, raw in form.items():
-        if key.startswith("measures_"):
-            risk_number = key[len("measures_"):]
-            lines = [line.strip() for line in (raw or "").split("\n") if line.strip()]
-            measures_data[risk_number] = lines
-
-    await CustomizationService.save_section(db, current_user.id, "MANAGEMENT_MEASURES", measures_data)
-    return RedirectResponse(url="/settings/risks?saved=1", status_code=303)
-
-
-@router.post("/settings/reset-risks")
-async def settings_reset_risks(
-    current_user: User = Depends(require_authenticated),
-    subscription: Subscription = Depends(require_subscription),
-    db: AsyncSession = Depends(get_db),
-):
-    await CustomizationService.reset_section(db, current_user.id, "MANAGEMENT_MEASURES")
-    return RedirectResponse(url="/settings/risks", status_code=303)
+        if key.startswith("measure_"):
+            values[key[len("measure_"):]] = (raw or "").strip()
+    await CustomizationService.save_measures(db, current_user.id, values)
+    return redirect_with_flash("/settings/risks", "Меры и риски сохранены.", level="success")

@@ -12,6 +12,7 @@ from app.modules.auth.models import User
 from app.modules.auth.dependencies import get_current_user
 from app.modules.auth.service import PasswordService, SessionService
 from app.shared.templating import templates, settings
+from app.shared.flash import redirect_with_flash
 
 router = APIRouter()
 
@@ -35,23 +36,14 @@ async def register(
 ):
     email = email.strip().lower()
     if "@" not in email or "." not in email:
-        return RedirectResponse(
-            url=f"/?error=email&email={quote(email)}#register",
-            status_code=303,
-        )
+        return redirect_with_flash("/#register", REGISTER_ERRORS.get("email", "Некорректный email."), level="error")
 
     if len(password) < 8:
-        return RedirectResponse(
-            url=f"/?error=password&email={quote(email)}#register",
-            status_code=303,
-        )
+        return redirect_with_flash("/#register", REGISTER_ERRORS.get("password", "Пароль должен быть не короче 8 символов."), level="error")
 
     result = await db.execute(select(User).where(User.email == email))
     if result.scalar_one_or_none() is not None:
-        return RedirectResponse(
-            url=f"/?error=exists&email={quote(email)}#register",
-            status_code=303,
-        )
+        return redirect_with_flash("/#register", REGISTER_ERRORS.get("exists", "Пользователь уже существует."), level="error")
 
     user = User(
         email=email,
@@ -104,10 +96,7 @@ async def login(
     user = result.scalar_one_or_none()
 
     if user is None or not PasswordService.verify_password(password, user.password_hash):
-        return RedirectResponse(
-            url=f"/login?error=invalid&email={quote(email)}",
-            status_code=303,
-        )
+        return redirect_with_flash(f"/login?email={quote(email)}", LOGIN_ERRORS.get("invalid", "Неверный email или пароль."), level="error")
 
     response = RedirectResponse(url="/account", status_code=303)
     response.set_cookie(

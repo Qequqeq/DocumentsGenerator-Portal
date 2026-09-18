@@ -9,6 +9,7 @@ from app.modules.auth.models import User
 from app.modules.subscriptions.dependencies import get_optional_subscription, require_subscription
 from app.modules.subscriptions.models import Subscription
 from app.modules.templates.service import ALLOWED_KINDS, TemplateService
+from app.shared.flash import redirect_with_flash
 from app.shared.templating import templates
 
 router = APIRouter()
@@ -56,11 +57,11 @@ async def templates_upload(
     db: AsyncSession = Depends(get_db),
 ):
     if kind not in ALLOWED_KINDS:
-        return RedirectResponse(url="/settings/templates?error=bad_kind", status_code=303)
+        return redirect_with_flash("/settings/templates", ERROR_MESSAGES.get("bad_kind", "Неизвестный тип шаблона."), level="error")
     error_code = await TemplateService.save_custom(db, current_user.id, kind, file)
     if error_code:
-        return RedirectResponse(url=f"/settings/templates?error={error_code}", status_code=303)
-    return RedirectResponse(url="/settings/templates?saved=1", status_code=303)
+        return redirect_with_flash("/settings/templates", ERROR_MESSAGES.get(error_code, "Ошибка загрузки шаблона."), level="error")
+    return redirect_with_flash("/settings/templates", "Шаблон успешно загружен.", level="success")
 
 
 @router.post("/settings/templates/delete")
@@ -72,4 +73,4 @@ async def templates_delete(
 ):
     if kind in ALLOWED_KINDS:
         await TemplateService.delete_custom(db, current_user.id, kind)
-    return RedirectResponse(url="/settings/templates", status_code=303)
+    return redirect_with_flash("/settings/templates", "Шаблон удалён. Возвращены стандартные настройки.", level="info")
