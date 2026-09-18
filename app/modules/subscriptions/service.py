@@ -12,8 +12,8 @@ from app.shared.timeutils import utcnow
 class SubscriptionService:
     @staticmethod
     async def get_active_subscription(
-        db: AsyncSession,
-        user_id: int,
+            db: AsyncSession,
+            user_id: int,
     ) -> Optional[Subscription]:
         result = await db.execute(
             select(Subscription)
@@ -28,7 +28,14 @@ class SubscriptionService:
 
         if subscription is None:
             return None
-        if subscription.expires_at < utcnow():
+
+        now = utcnow()
+        expires_at = subscription.expires_at
+        if expires_at.tzinfo is None:
+            from datetime import timezone
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+        if expires_at < now:
             subscription.status = "expired"
             await db.commit()
             return None

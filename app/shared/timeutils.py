@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(timezone.utc)
 
 
 def to_iso_utc(dt: datetime | None) -> str:
