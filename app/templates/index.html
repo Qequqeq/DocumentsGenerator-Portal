@@ -589,12 +589,6 @@
                     <li class="flex items-start gap-3 text-sm text-slate-300"><svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Развёртывание, обновления и обслуживание на нас</li>
                 </ul>
 
-                {% if selfhost_sent %}
-                <div class="mt-auto rounded-xl bg-slate-800 border border-slate-700 p-5 text-center">
-                    <p class="text-sm font-semibold text-green-400 mb-1">Заявка отправлена</p>
-                    <p class="text-xs text-slate-400">Свяжемся с вами по указанным контактам.</p>
-                </div>
-                {% else %}
                 <form method="post" action="/selfhost-request" class="mt-auto space-y-3">
                     <input type="text" name="name" required placeholder="Ваше имя"
                            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
@@ -607,7 +601,6 @@
                         Отправить заявку
                     </button>
                 </form>
-                {% endif %}
             </div>
 
         </div>

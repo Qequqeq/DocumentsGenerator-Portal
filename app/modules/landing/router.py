@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.subscriptions.models import Subscription
 from app.modules.subscriptions.service import SubscriptionService
 from app.shared.templating import templates
+from app.shared.flash import redirect_with_flash
 
 from app.config import get_settings
 from app.database import get_db
@@ -33,7 +34,6 @@ async def landing_main(
         "index.html",
         {
             "request": request,
-            "selfhost_sent": sent == "1",
             "register_error": error,
             "register_email": email,
             "current_user_email": current_user.email if current_user else None,
@@ -49,4 +49,8 @@ async def selfhost_request(
     comment: str = Form(""),
 ):
     SelfHostService.add_request(name, contact, comment)
-    return RedirectResponse(url="/?sent=1#pricing", status_code=303)
+    return redirect_with_flash(
+        "/#pricing",
+        "Заявка на self-hosting отправлена. Мы свяжемся с вами.",
+        level="success",
+    )
