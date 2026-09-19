@@ -502,7 +502,7 @@
         <div class="text-center mb-14">
             <span class="reveal reveal-up inline-block text-xs font-semibold uppercase tracking-widest text-blue-600 mb-3">Тарифы</span>
             <h2 class="reveal reveal-up reveal-delay-1 text-3xl md:text-4xl font-bold text-gray-900 mb-4">Выберите свой формат</h2>
-            <p class="reveal reveal-up reveal-delay-2 text-lg text-gray-500 max-w-2xl mx-auto">Платите за отдельные отчёты, оформите подписку для безлимитной работы и кастомизации — или разверните сервис на своём сервере.</p>
+            <p class="reveal reveal-up reveal-delay-2 text-lg text-gray-500 max-w-2xl mx-auto">Платите за отдельные отчёты, оформите подписку для безлимитной работы и кастомизации или разверните сервис на своём сервере.</p>
         </div>
 
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
@@ -510,31 +510,45 @@
             <!-- Базовый -->
             <div class="reveal reveal-left reveal-delay-2 bg-white border border-gray-200 rounded-2xl p-8 flex flex-col">
                 <h3 class="text-lg font-semibold text-gray-900 mb-1">Базовый</h3>
-                <p class="text-sm text-gray-500 mb-6">Веб-версия · для разовых задач</p>
+                <p class="text-sm text-gray-500 mb-6">Для разовых задач</p>
                 <div class="mb-2">
                     <span class="text-4xl font-bold text-gray-900">1 000</span>
-                    <span class="text-gray-500"> ₽ / отчёт</span>
+                    <span class="text-gray-500"> руб / отчёт</span>
                 </div>
-                <p class="text-sm text-gray-500 mb-6">До 5 должностей. Каждая следующая должность +50 ₽.</p>
+                <p class="text-sm text-gray-500 mb-6">До 5 должностей. Каждая следующая должность за 50 руб.</p>
                 <ul class="space-y-3 mb-8">
                     <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Работает в браузере, ничего не нужно устанавливать</li>
                     <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Полный цикл: от загрузки данных до готовых документов</li>
                     <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Шаблоны должностей и образцы файлов включены</li>
                     <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Платите только за готовый отчёт</li>
                 </ul>
-                <a href="/#register" class="mt-auto block w-full text-center text-sm font-semibold text-blue-600 bg-white border border-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg transition-colors">Попробовать бесплатно</a>
+                {% if current_user_email %}
+                    {% if sub %}
+                        <a href="/account" class="mt-auto block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">
+                            Перейти в кабинет
+                        </a>
+                    {% else %}
+                        <a href="/account" class="mt-auto block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">
+                            Начать работу
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="/#register" class="mt-auto block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">
+                        Попробовать бесплатно
+                    </a>
+                {% endif %}
             </div>
 
             <!-- Продвинутый -->
             <div class="reveal reveal-up reveal-delay-3 relative border-2 border-blue-600 rounded-2xl p-8 shadow-xl shadow-blue-100 bg-white flex flex-col">
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-semibold whitespace-nowrap">Для регулярной работы</div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-1">Продвинутый</h3>
-                <p class="text-sm text-gray-500 mb-6">Веб-версия · подписка</p>
+                <p class="text-sm text-gray-500 mb-6">Подписка</p>
                 <div class="mb-2">
                     <span class="text-4xl font-bold text-gray-900">5 000</span>
-                    <span class="text-gray-500"> ₽ / месяц</span>
+                    <span class="text-gray-500"> руб / месяц</span>
                 </div>
-                <p class="text-sm text-gray-500 mb-6">Или 50 000 ₽ в год (два месяца бесплатно).</p>
+                <p class="text-sm text-gray-500 mb-6">Или 50 000 руб в год.</p>
                 <ul class="space-y-3 mb-8">
                     <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Неограниченное количество отчётов и должностей</li>
                     <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Настройка диапазонов рисков и порогов уровней</li>
@@ -542,7 +556,21 @@
                     <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Собственные меры противодействия рискам</li>
                     <li class="flex items-start gap-3 text-sm text-gray-600"><svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Всё из базового тарифа включено</li>
                 </ul>
-                <a href="/#register" class="mt-auto block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">Оформить подписку</a>
+                {% if current_user_email %}
+                    {% if sub %}
+                        <a href="/account" class="mt-auto block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">
+                            У вас уже есть активная подписка
+                        </a>
+                    {% else %}
+                        <a href="/account" class="mt-auto block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">
+                            Оформить подписку
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="/#register" class="mt-auto block w-full text-center text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors">
+                        Оформить подписку
+                    </a>
+                {% endif %}
             </div>
 
             <!-- Селф-хостинг -->

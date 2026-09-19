@@ -2,6 +2,9 @@
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.modules.subscriptions.models import Subscription
+from app.modules.subscriptions.service import SubscriptionService
 from app.shared.templating import templates
 
 from app.config import get_settings
@@ -20,7 +23,12 @@ async def landing_main(
     sent: str = "",
     error: str = "",
     email: str = "",
+    db: AsyncSession = Depends(get_db),
 ):
+    sub = None
+    if current_user:
+        sub = await SubscriptionService.get_active_subscription(db, current_user.id)
+
     return templates.TemplateResponse(
         "index.html",
         {
@@ -29,6 +37,7 @@ async def landing_main(
             "register_error": error,
             "register_email": email,
             "current_user_email": current_user.email if current_user else None,
+            "sub": sub
         },
     )
 
